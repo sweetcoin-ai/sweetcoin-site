@@ -189,3 +189,36 @@ body {
   display: block;
   border-radius: 12px;
 }
+
+
+/* 第六区样式 */
+#partners {
+  padding: 80px 20px;
+  background: linear-gradient(to bottom, #08111d, #050a10);
+  color: white;
+  text-align: center;
+}
+
+#partners .container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+#partners h2 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+
+#partners .description {
+  font-size: 1.2em;
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+#partners .illustration {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  display: block;
+  border-radius: 12px;
+}
