@@ -123,3 +123,36 @@ body {
   display: block;
   border-radius: 12px;
 }
+
+
+/* 第四区样式 */
+#real-use {
+  padding: 80px 20px;
+  background: linear-gradient(to bottom, #0a1728, #060d14);
+  color: white;
+  text-align: center;
+}
+
+#real-use .container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+#real-use h2 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+
+#real-use .description {
+  font-size: 1.2em;
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+#real-use .illustration {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  display: block;
+  border-radius: 12px;
+}
