@@ -1,0 +1,92 @@
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #fff;
+  color: #111;
+}
+
+#hero {
+  background-image: url("assets/hero-bg.png");
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  color: white;
+  position: relative;
+}
+
+.hero-overlay {
+  background: rgba(0, 0, 0, 0.4);
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  animation: fadeIn 1.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.btn {
+  padding: 12px 24px;
+  margin: 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.btn.gold {
+  background-color: #ffcc33;
+  color: #111;
+}
+
+.btn.navy {
+  background-color: #223355;
+  color: white;
+}
+
+.tagline {
+  font-size: 1.5em;
+  margin-bottom: 30px;
+}
+
+.container h1 {
+  font-size: 3em;
+  margin-bottom: 15px;
+}
+
+
+/* 第二区样式 */
+#intro {
+  padding: 80px 20px;
+  text-align: center;
+  background: linear-gradient(to bottom, #0d1c2e, #111);
+  color: white;
+}
+
+#intro .container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+#intro h2 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+
+#intro .description {
+  font-size: 1.2em;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+#intro .illustration {
+  width: 100%;
+  max-width: 500px;
+  margin: 30px auto;
+  display: block;
+  border-radius: 12px;
+}
