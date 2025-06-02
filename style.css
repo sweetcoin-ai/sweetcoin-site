@@ -305,3 +305,16 @@ footer a:hover {
     padding: 40px 0;
   }
 }
+.yellow-btn {
+  background-color: #fcd34d;
+  color: #000;
+  border: none;
+  font-weight: bold;
+}
+
+.dark-btn {
+  background-color: #1f2937;
+  color: #fff;
+  border: none;
+  font-weight: bold;
+}
