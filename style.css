@@ -338,3 +338,19 @@ footer a:hover {
   background-color: #1f2937;
   color: #fff;
 }
+/* 调整第一区按钮宽度和间距（移动端） */
+@media (max-width: 768px) {
+  .hero-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+  }
+
+  .hero-buttons .btn {
+    width: 220px;
+    max-width: 90%;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
