@@ -42,11 +42,13 @@ body {
 .btn.gold {
   background-color: #ffcc33;
   color: #111;
+  width: 220px;
 }
 
 .btn.navy {
   background-color: #223355;
   color: white;
+  width: 220px;
 }
 
 .tagline {
@@ -344,7 +346,7 @@ footer a:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 30px;
+    gap: 31px;
   }
 
   .hero-buttons .btn {
