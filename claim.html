@@ -15,6 +15,7 @@
       padding: 20px;
       font-size: 18px;
       line-height: 1.8;
+      text-align: center;
     }
     .btn-yellow {
       background-color: #facc15;
@@ -26,12 +27,9 @@
       cursor: pointer;
       text-decoration: none;
     }
-    .btn-group {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-top: 30px;
+    .fade-out {
+      opacity: 0;
+      transition: opacity 1s ease;
     }
     .hidden { display: none; }
     footer {
@@ -54,28 +52,27 @@
 </header>
 
 <section class="container" id="introSection">
-  <h1>领取 Sweetcoin（SWTC）</h1>
-  <p>了解 Sweetcoin 项目的亮点：</p>
-  <ul>
-    <li>💎 Sweetcoin（SWTC）是一种由 AI 治理的去中心化稳定币，摆脱了银行或政府的控制。</li>
-    <li>🍦 它的价值锚定于现实世界的一支基础冰淇淋甜筒价格 —— 公平、直观、人人易懂。</li>
-    <li>🧠 通过 AI 与大众共识进行治理 —— 无中央权力，无隐性规则。</li>
-    <li>🚀 支持现实支付，配合二维码、移动钱包，在币安智能链上实现快速交易。</li>
-    <li>🌍 旨在成为去中心化商业中“普世价值单位”的未来通用货币。</li>
+  <h1>Claim Sweetcoin (SWTC)</h1>
+  <p>Why choose Sweetcoin?</p>
+  <ul style="text-align: left; max-width: 600px; margin: auto;">
+    <li>💎 A decentralized stablecoin governed by AI — no banks or governments.</li>
+    <li>🍦 Pegged to the global average price of an ice cream cone — fair and intuitive.</li>
+    <li>🧠 AI and public consensus ensure transparency — no central control, no hidden rules.</li>
+    <li>🚀 Real-world payments with QR support and fast transactions via BSC.</li>
+    <li>🌍 Designed to become a universal unit of value in decentralized commerce.</li>
   </ul>
-  <p>🫱 现在邀请你成为 SWTC 的早期持币者，领取 20 枚免费的 Sweetcoin，共同参与构建未来的货币世界。</p>
-  <div style="text-align:center;">
-    <button class="btn-yellow" onclick="showClaimSection()">我已了解，开始领取</button>
+  <p style="margin-top: 20px;">
+    Be among the first holders. Get 20 free SWTC now and join the financial future.
+  </p>
+  <div style="margin-top: 30px;">
+    <button class="btn-yellow" onclick="revealClaim()">I understand, continue</button>
   </div>
 </section>
 
 <section class="container hidden" id="claimSection">
-  <h2>连接钱包并领取</h2>
-  <p>连接你的 Web3 钱包并领取 <strong>20 枚 Sweetcoin (SWTC)</strong>。</p>
-  <div class="btn-group">
-    <button id="connectButton" class="btn-yellow">Connect Wallet</button>
-    <button id="claimButton" class="btn-yellow" disabled>Claim 20 SWTC</button>
-  </div>
+  <h2>Claim Your Tokens</h2>
+  <p>Click the button below to connect your wallet and claim <strong>20 SWTC</strong>.</p>
+  <button id="actionButton" class="btn-yellow">Connect Wallet</button>
   <p id="statusMessage" style="margin-top: 20px; color: #333;"></p>
 </section>
 
@@ -86,59 +83,54 @@
 <script>
   const CONTRACT_ADDRESS = "0x005A04acdC294f20f7Ab60fd51525299838393B3";
   const CONTRACT_ABI = ["function claim() external"];
-
   let provider, signer, contract;
+  let walletConnected = false;
+  let claimed = false;
 
-  function showClaimSection() {
-    document.getElementById("introSection").classList.add("hidden");
-    document.getElementById("claimSection").classList.remove("hidden");
+  function revealClaim() {
+    const intro = document.getElementById("introSection");
+    intro.classList.add("fade-out");
+    setTimeout(() => {
+      intro.classList.add("hidden");
+      document.getElementById("claimSection").classList.remove("hidden");
+    }, 1000);
   }
 
-  async function connectWallet() {
-    if (!window.ethereum) {
-      statusMessage.textContent = "请先安装 MetaMask 或其他 Web3 钱包。";
-      return;
-    }
-    try {
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      signer = provider.getSigner();
-      contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-      const userAddress = await signer.getAddress();
-      statusMessage.textContent = "钱包已连接：" + userAddress;
-      claimButton.disabled = false;
-    } catch (err) {
-      statusMessage.textContent = "连接失败：" + err.message;
-    }
-  }
-
-  async function claimSweetcoin() {
-    if (!contract) {
-      statusMessage.textContent = "请先连接钱包。";
-      return;
-    }
-    try {
-      const network = await provider.getNetwork();
-      if (network.chainId !== 56) {
-        statusMessage.textContent = "请切换至 BSC 主网 (chainId: 56)";
-        return;
+  async function handleAction() {
+    const button = document.getElementById("actionButton");
+    if (!walletConnected) {
+      try {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+        const userAddress = await signer.getAddress();
+        document.getElementById("statusMessage").textContent = "Connected: " + userAddress;
+        walletConnected = true;
+        button.textContent = "Claim 20 SWTC";
+      } catch (err) {
+        document.getElementById("statusMessage").textContent = "Connection failed: " + err.message;
       }
-      statusMessage.textContent = "正在发起交易，请在钱包中确认...";
-      const tx = await contract.claim();
-      await tx.wait();
-      statusMessage.textContent = "领取成功！你已获得 20 SWTC 🎉";
-      claimButton.disabled = true;
-    } catch (err) {
-      statusMessage.textContent = "领取失败：" + (err.error?.message || err.message);
+    } else if (!claimed) {
+      try {
+        const network = await provider.getNetwork();
+        if (network.chainId !== 56) {
+          document.getElementById("statusMessage").textContent = "Please switch to BSC Mainnet.";
+          return;
+        }
+        document.getElementById("statusMessage").textContent = "Processing transaction...";
+        const tx = await contract.claim();
+        await tx.wait();
+        document.getElementById("statusMessage").textContent = "Success! 20 SWTC claimed 🎉";
+        claimed = true;
+        button.disabled = true;
+      } catch (err) {
+        document.getElementById("statusMessage").textContent = "Claim failed: " + (err.error?.message || err.message);
+      }
     }
   }
 
-  const connectButton = document.getElementById("connectButton");
-  const claimButton = document.getElementById("claimButton");
-  const statusMessage = document.getElementById("statusMessage");
-
-  connectButton.addEventListener("click", connectWallet);
-  claimButton.addEventListener("click", claimSweetcoin);
+  document.getElementById("actionButton").addEventListener("click", handleAction);
 </script>
 </body>
 </html>
