@@ -86,6 +86,7 @@
   let provider, signer, contract;
   let walletConnected = false;
   let claimed = false;
+  let actionLocked = false;
 
   function revealClaim() {
     const intro = document.getElementById("introSection");
@@ -98,35 +99,44 @@
 
   async function handleAction() {
     const button = document.getElementById("actionButton");
-    if (!walletConnected) {
-      try {
+    const status = document.getElementById("statusMessage");
+
+    if (actionLocked) return;
+    actionLocked = true;
+    button.disabled = true;
+
+    try {
+      if (!walletConnected) {
+        status.textContent = "Waiting for wallet...";
         await window.ethereum.request({ method: "eth_requestAccounts" });
         provider = new ethers.providers.Web3Provider(window.ethereum);
         signer = provider.getSigner();
         contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
         const userAddress = await signer.getAddress();
-        document.getElementById("statusMessage").textContent = "Connected: " + userAddress;
+        status.textContent = "Connected: " + userAddress;
         walletConnected = true;
         button.textContent = "Claim 20 SWTC";
-      } catch (err) {
-        document.getElementById("statusMessage").textContent = "Connection failed: " + err.message;
-      }
-    } else if (!claimed) {
-      try {
+        button.disabled = false;
+        actionLocked = false;
+      } else if (!claimed) {
         const network = await provider.getNetwork();
         if (network.chainId !== 56) {
-          document.getElementById("statusMessage").textContent = "Please switch to BSC Mainnet.";
+          status.textContent = "Please switch to BSC Mainnet.";
+          button.disabled = false;
+          actionLocked = false;
           return;
         }
-        document.getElementById("statusMessage").textContent = "Processing transaction...";
+        status.textContent = "Processing transaction...";
         const tx = await contract.claim();
         await tx.wait();
-        document.getElementById("statusMessage").textContent = "Success! 20 SWTC claimed 🎉";
+        status.textContent = "Success! 20 SWTC claimed 🎉";
         claimed = true;
         button.disabled = true;
-      } catch (err) {
-        document.getElementById("statusMessage").textContent = "Claim failed: " + (err.error?.message || err.message);
       }
+    } catch (err) {
+      status.textContent = "Error: " + (err.error?.message || err.message);
+      button.disabled = false;
+      actionLocked = false;
     }
   }
 
