@@ -188,5 +188,53 @@
   document.getElementById('connectBtn')?.addEventListener('click', connectWallet);
 </script>
 
+
+<!-- Wallet Fallback Options -->
+<div id="walletOptions" style="display:none; margin-top: 20px;">
+  <p style="font-weight:bold;">No wallet detected. Choose one:</p>
+  <button onclick="openMetaMask()">Open in MetaMask</button>
+  <button onclick="openTrustWallet()">Open in Trust Wallet</button>
+</div>
+
+<style>
+  #walletOptions button {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 8px 15px;
+    margin-right: 10px;
+    font-weight: bold;
+    border-radius: 5px;
+  }
+</style>
+
+<script>
+  async function connectWallet() {
+    const connectBtn = document.getElementById('connectBtn');
+    const walletOptions = document.getElementById('walletOptions');
+
+    if (typeof window.ethereum !== 'undefined' && typeof window.ethereum.request === 'function') {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        alert("Wallet connected: " + accounts[0]);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to connect wallet");
+      }
+    } else {
+      alert("No wallet detected. Please choose one below.");
+      if (walletOptions) walletOptions.style.display = 'block';
+    }
+  }
+
+  function openMetaMask() {
+    window.location.href = `https://metamask.app.link/dapp/${window.location.hostname}/claim.html`;
+  }
+
+  function openTrustWallet() {
+    window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=https://${window.location.hostname}/claim.html`;
+  }
+
+  document.getElementById('connectBtn')?.addEventListener('click', connectWallet);
+</script>
+
 </body>
-</html>
