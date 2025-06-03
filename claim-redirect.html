@@ -2,46 +2,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Redirecting to Wallet</title>
-  <style>
-    body {
-      background-color: #fef9c3;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 60px 20px;
-    }
-    .box {
-      display: inline-block;
-      border: 2px solid #facc15;
-      padding: 20px;
-      border-radius: 10px;
-      background: white;
-    }
-    h1 {
-      color: #111827;
-    }
-    p {
-      color: #374151;
-      margin-top: 10px;
-    }
-    a {
-      color: #2563eb;
-      text-decoration: underline;
-    }
-  </style>
-  <script>
-    const isMobile = /iphone|android|ipad|mobile/i.test(navigator.userAgent);
-    if (isMobile) {
-      window.location.href = "metamask://dapp/sweetcoin-site-fqqn.vercel.app/claim.html";
-    }
-  </script>
+    <meta charset="UTF-8">
+    <title>Redirecting to MetaMask</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        window.onload = function () {
+            const isMobile = /iphone|android|ipad/i.test(navigator.userAgent);
+            const deepLink = "metamask://dapp/sweetcoin-site-fqqn.vercel.app/claim.html";
+            if (isMobile) {
+                setTimeout(() => {
+                    window.location.href = deepLink;
+                }, 2000);
+            }
+        };
+    </script>
 </head>
 <body>
-  <div class="box">
-    <h1>📢 Desktop users: Please install the <a href="https://metamask.io/download.html" target="_blank">MetaMask browser extension</a> to claim Sweetcoin.</h1>
-    <p>📱 For the easiest experience, we recommend claiming on mobile using the MetaMask App.</p>
-  </div>
+    <main style="padding: 2em;">
+        <h2>📱 Please open in MetaMask App</h2>
+        <p>This page will try to redirect to the MetaMask App automatically.</p>
+        <p>👉 <strong>On mobile, your browser may ask “Allow this site to open another app”</strong>. Please tap <strong>“Allow” or “Open”</strong> to continue.</p>
+        <a href="metamask://dapp/sweetcoin-site-fqqn.vercel.app/claim.html" class="yellow-btn">Open in MetaMask</a>
+    </main>
 </body>
 </html>
