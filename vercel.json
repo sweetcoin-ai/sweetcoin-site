@@ -1,6 +1,9 @@
-
 {
   "redirects": [
-    { "source": "/claim", "destination": "/claim.html", "permanent": true }
+    {
+      "source": "/claim",
+      "destination": "/claim.html",
+      "permanent": true
+    }
   ]
 }
