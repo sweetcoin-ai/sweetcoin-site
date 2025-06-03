@@ -237,4 +237,99 @@
   document.getElementById('connectBtn')?.addEventListener('click', connectWallet);
 </script>
 
+
+<!-- Wallet Detection Toast -->
+<div id="walletToast" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+  background:#333; color:#fff; padding:10px 20px; border-radius:5px; font-size:14px; z-index:999;">
+</div>
+
+<script>
+  function showToast(msg) {
+    const toast = document.getElementById('walletToast');
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(() => {
+      toast.style.display = 'none';
+    }, 3000);
+  }
+
+  async function connectWallet() {
+    const isEthereumAvailable = typeof window.ethereum !== 'undefined';
+
+    if (isEthereumAvailable) {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        showToast("Wallet connected: " + accounts[0]);
+        // 可添加自动领取逻辑
+      } catch (err) {
+        console.error(err);
+        showToast("Wallet connection failed.");
+      }
+    } else {
+      // 非钱包内浏览器，尝试唤起钱包 app
+      const domain = window.location.hostname;
+      const dappUrl = `https://${domain}/claim.html`;
+
+      // 尝试打开 MetaMask
+      const metamaskUrl = `https://metamask.app.link/dapp/${domain}/claim.html`;
+      window.location.href = metamaskUrl;
+
+      // 若 MetaMask 未响应，Trust Wallet 会作为备选
+      setTimeout(() => {
+        const trustUrl = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
+        window.location.href = trustUrl;
+      }, 3000); // 等待3秒后尝试 Trust Wallet
+
+      // 若都失败，显示提示（预防用户停留在普通浏览器）
+      setTimeout(() => {
+        showToast("No wallet detected. Please open this site in a wallet app.");
+      }, 6000);
+    }
+  }
+
+  document.getElementById('connectBtn')?.addEventListener('click', connectWallet);
+</script>
+
+
+<!-- Auto-Connect & Auto-Claim -->
+<div id="walletToast" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+  background:#333; color:#fff; padding:10px 20px; border-radius:5px; font-size:14px; z-index:999;">
+</div>
+
+<script>
+  function showToast(msg) {
+    const toast = document.getElementById('walletToast');
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(() => {
+      toast.style.display = 'none';
+    }, 3000);
+  }
+
+  const CONTRACT_ABI = ["function claim() external"];
+  const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS";
+  let provider, signer, contract, claimed = false;
+
+  async function autoConnectAndClaim() {
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+        if (!claimed) {
+          const tx = await contract.claim();
+          showToast("✅ 20 SWTC Claimed!");
+          claimed = true;
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("❌ Claim failed");
+      }
+    }
+  }
+
+  window.addEventListener('load', autoConnectAndClaim);
+</script>
+
 </body>
