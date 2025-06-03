@@ -5,142 +5,70 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Claim Sweetcoin</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
   <style>
-    body { font-family: sans-serif; }
-    .container {
-      max-width: 800px;
-      margin: 80px auto;
-      padding: 20px;
-      font-size: 18px;
-      line-height: 1.8;
+    body {
+      font-family: Arial, sans-serif;
       text-align: center;
+      padding: 50px;
+      background-color: #ffffff;
     }
-    .btn-yellow {
+    h1 {
+      font-size: 24px;
+      color: #111827;
+    }
+    p {
+      font-size: 16px;
+      color: #374151;
+    }
+    button {
       background-color: #facc15;
-      color: #000;
-      padding: 12px 28px;
+      color: black;
+      font-weight: bold;
+      padding: 14px 24px;
       border: none;
       border-radius: 8px;
-      font-size: 16px;
       cursor: pointer;
-      text-decoration: none;
+      font-size: 16px;
     }
-    .fade-out {
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
-    .hidden { display: none; }
-    footer {
+    .footer {
       margin-top: 60px;
-      padding: 20px;
-      background: #f4f4f4;
-      text-align: center;
+      font-size: 14px;
+      color: #9ca3af;
     }
   </style>
+  <script>
+    window.onload = function () {
+      if (typeof window.ethereum === 'undefined') {
+        window.location.href = "claim-redirect.html";
+        return;
+      }
+
+      const connectBtn = document.getElementById("connectBtn");
+      const status = document.getElementById("status");
+      let connected = false;
+
+      connectBtn.onclick = async function () {
+        if (connected) return;
+        connectBtn.disabled = true;
+        status.textContent = "Waiting for wallet...";
+
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          status.textContent = "Wallet connected: " + accounts[0];
+          connected = true;
+        } catch (err) {
+          status.textContent = "Connection failed. Please try again.";
+          connectBtn.disabled = false;
+        }
+      };
+    };
+  </script>
 </head>
 <body>
-<header>
-  <nav>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="whitepaper.html">Whitepaper</a></li>
-      <li><a href="claim.html">Claim</a></li>
-    </ul>
-  </nav>
-</header>
-
-<section class="container" id="introSection">
-  <h1>Claim Sweetcoin (SWTC)</h1>
-  <p>Why choose Sweetcoin?</p>
-  <ul style="text-align: left; max-width: 600px; margin: auto;">
-    <li>💎 A decentralized stablecoin governed by AI — no banks or governments.</li>
-    <li>🍦 Pegged to the global average price of an ice cream cone — fair and intuitive.</li>
-    <li>🧠 AI and public consensus ensure transparency — no central control, no hidden rules.</li>
-    <li>🚀 Real-world payments with QR support and fast transactions via BSC.</li>
-    <li>🌍 Designed to become a universal unit of value in decentralized commerce.</li>
-  </ul>
-  <p style="margin-top: 20px;">
-    Be among the first holders. Get 20 free SWTC now and join the financial future.
-  </p>
-  <div style="margin-top: 30px;">
-    <button class="btn-yellow" onclick="revealClaim()">I understand, continue</button>
-  </div>
-</section>
-
-<section class="container hidden" id="claimSection">
-  <h2>Claim Your Tokens</h2>
+  <h1>Claim Your Tokens</h1>
   <p>Click the button below to connect your wallet and claim <strong>20 SWTC</strong>.</p>
-  <button id="actionButton" class="btn-yellow">Connect Wallet</button>
-  <p id="statusMessage" style="margin-top: 20px; color: #333;"></p>
-</section>
-
-<footer>
-  <p>&copy; 2025 Sweetcoin. All rights reserved.</p>
-</footer>
-
-<script>
-  const CONTRACT_ADDRESS = "0x005A04acdC294f20f7Ab60fd51525299838393B3";
-  const CONTRACT_ABI = ["function claim() external"];
-  let provider, signer, contract;
-  let walletConnected = false;
-  let claimed = false;
-  let actionLocked = false;
-
-  function revealClaim() {
-    const intro = document.getElementById("introSection");
-    intro.classList.add("fade-out");
-    setTimeout(() => {
-      intro.classList.add("hidden");
-      document.getElementById("claimSection").classList.remove("hidden");
-    }, 1000);
-  }
-
-  async function handleAction() {
-    const button = document.getElementById("actionButton");
-    const status = document.getElementById("statusMessage");
-
-    if (actionLocked) return;
-    actionLocked = true;
-    button.disabled = true;
-
-    try {
-      if (!walletConnected) {
-        status.textContent = "Waiting for wallet...";
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
-        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-        const userAddress = await signer.getAddress();
-        status.textContent = "Connected: " + userAddress;
-        walletConnected = true;
-        button.textContent = "Claim 20 SWTC";
-        button.disabled = false;
-        actionLocked = false;
-      } else if (!claimed) {
-        const network = await provider.getNetwork();
-        if (network.chainId !== 56) {
-          status.textContent = "Please switch to BSC Mainnet.";
-          button.disabled = false;
-          actionLocked = false;
-          return;
-        }
-        status.textContent = "Processing transaction...";
-        const tx = await contract.claim();
-        await tx.wait();
-        status.textContent = "Success! 20 SWTC claimed 🎉";
-        claimed = true;
-        button.disabled = true;
-      }
-    } catch (err) {
-      status.textContent = "Error: " + (err.error?.message || err.message);
-      button.disabled = false;
-      actionLocked = false;
-    }
-  }
-
-  document.getElementById("actionButton").addEventListener("click", handleAction);
-</script>
+  <button id="connectBtn">Connect Wallet</button>
+  <p id="status" style="margin-top: 20px; color: #d97706;"></p>
+  <div class="footer">© 2025 Sweetcoin. All rights reserved.</div>
 </body>
 </html>
