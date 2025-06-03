@@ -3,47 +3,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Claim Sweetcoin</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="claim.js"></script>
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="whitepaper_larger.html">Whitepaper</a>
-            <a href="claim.html">Claim</a>
-        </nav>
-    </header>
-    <main>
+    <div class="container">
         <h1>Claim Your Tokens</h1>
         <p>Click the button below to connect your wallet and claim <strong>20 SWTC</strong>.</p>
-        <button id="connectBtn" class="yellow-btn">Connect Wallet</button>
-        <p id="status" style="margin-top: 1em;"></p>
-        <script>
-            const connectBtn = document.getElementById('connectBtn');
-            const status = document.getElementById('status');
-
-            connectBtn.onclick = async () => {
-                if (!window.ethereum) {
-                    status.textContent = "MetaMask is not installed. Please install MetaMask to continue.";
-                    return;
-                }
-
-                try {
-                    connectBtn.disabled = true;
-                    status.textContent = "Waiting for wallet...";
-                    await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    status.textContent = "Wallet connected! You can now claim your tokens.";
-                    connectBtn.disabled = false;
-                } catch (err) {
-                    status.textContent = "Connection failed. Please try again.";
-                    connectBtn.disabled = false;
-                }
-            };
-        </script>
-    </main>
-    <footer>
-        <p>© 2025 Sweetcoin. All rights reserved.</p>
-    </footer>
+        <button id="connectButton" class="yellow-btn">Connect Wallet</button>
+        <p id="status"></p>
+    </div>
 </body>
 </html>

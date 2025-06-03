@@ -2,27 +2,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Redirecting to MetaMask</title>
-    <link rel="stylesheet" href="style.css">
-    <script>
-        window.onload = function () {
-            const isMobile = /iphone|android|ipad/i.test(navigator.userAgent);
-            const deepLink = "metamask://dapp/sweetcoin-site-fqqn.vercel.app/claim.html";
-            if (isMobile) {
-                setTimeout(() => {
-                    window.location.href = deepLink;
-                }, 2000);
-            }
-        };
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting...</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main style="padding: 2em;">
-        <h2>📱 Please open in MetaMask App</h2>
-        <p>This page will try to redirect to the MetaMask App automatically.</p>
-        <p>👉 <strong>On mobile, your browser may ask “Allow this site to open another app”</strong>. Please tap <strong>“Allow” or “Open”</strong> to continue.</p>
-        <a href="metamask://dapp/sweetcoin-site-fqqn.vercel.app/claim.html" class="yellow-btn">Open in MetaMask</a>
-    </main>
+  <div class="notice">
+    <p>⚠️ <strong>Please open in MetaMask App</strong></p>
+    <p>This page will try to redirect to the MetaMask App automatically.</p>
+    <p>👉 <strong>On mobile, your browser may ask “Allow this site to open another app”.</strong> Please tap “Allow” or “Open” to continue.</p>
+    <a href="metamask://dapp/sweetcoin-site-fqqn.vercel.app/claim.html">Open in MetaMask</a>
+  </div>
 </body>
+<script>
+  if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+    window.location.href = "metamask://dapp/sweetcoin-site-fqqn.vercel.app/claim.html";
+  }
+</script>
 </html>
