@@ -1,6 +1,7 @@
 
 document.addEventListener("DOMContentLoaded", async function () {
     const status = document.getElementById("status");
+    const claimButton = document.getElementById("connectButton");
     const BSC_PARAMS = {
         chainId: '0x38',
         chainName: 'Binance Smart Chain',
@@ -52,15 +53,13 @@ document.addEventListener("DOMContentLoaded", async function () {
                 return;
             }
 
-            // 检查是否合约处于暂停状态（尝试调用 pause 看是否报错）
             try {
-                await contract.methods.pause().call();  // 如果能调用说明未暂停
+                await contract.methods.pause().call();
             } catch (pauseErr) {
                 alert("领取已暂停，请稍后再试。");
                 return;
             }
 
-            // 一切正常，执行领取
             await contract.methods.claim().send({ from: account });
             alert("领取成功！请导入代币 SWTC，合约地址：" + contractAddress);
         } catch (error) {
@@ -74,22 +73,33 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    async function init() {
+    async function handleClaim() {
         if (typeof window.ethereum === 'undefined') {
             redirectToWallet();
             return;
         }
 
         try {
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const account = accounts[0];
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            let account = accounts[0];
+
+            if (!account) {
+                const requested = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                account = requested[0];
+            }
+
+            if (!account) {
+                alert("钱包未连接，请重试。");
+                return;
+            }
+
             await switchToBSC();
             await claimTokens(account);
         } catch (err) {
-            console.error("自动领取出错：", err);
-            redirectToWallet();
+            console.error("出错：", err);
+            alert("连接或领取失败：" + (err.message || "未知错误"));
         }
     }
 
-    await init();
+    claimButton.addEventListener("click", handleClaim);
 });
