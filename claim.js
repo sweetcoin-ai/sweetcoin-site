@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     function redirectToWallet() {
         if (isMobile()) {
-            // Deep link to MetaMask app
             window.location.href = "https://metamask.app.link/dapp/" + window.location.href.replace(/^https?:\/\//, "");
         } else {
             alert("请安装 MetaMask 插件或用钱包 App 打开链接。");
@@ -49,13 +48,29 @@ document.addEventListener("DOMContentLoaded", async function () {
         try {
             const alreadyClaimed = await contract.methods.hasClaimed(account).call();
             if (alreadyClaimed) {
-                alert("您已经领取过代币。");
+                alert("您已经领取过代币，无需重复领取。");
                 return;
             }
+
+            // 检查是否合约处于暂停状态（尝试调用 pause 看是否报错）
+            try {
+                await contract.methods.pause().call();  // 如果能调用说明未暂停
+            } catch (pauseErr) {
+                alert("领取已暂停，请稍后再试。");
+                return;
+            }
+
+            // 一切正常，执行领取
             await contract.methods.claim().send({ from: account });
             alert("领取成功！请导入代币 SWTC，合约地址：" + contractAddress);
         } catch (error) {
-            alert("领取失败：" + error.message);
+            if (error && error.message) {
+                alert("领取失败：" + error.message);
+            } else if (error && error.code) {
+                alert("领取失败，错误码：" + error.code);
+            } else {
+                alert("领取失败：未知错误");
+            }
         }
     }
 
