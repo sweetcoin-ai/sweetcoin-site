@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sweetcoin Merchant QR</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      text-align: center;
+      background-color: #fdfdfd;
+    }
+    input, button {
+      padding: 0.7rem;
+      font-size: 1rem;
+      margin-top: 1rem;
+      width: 80%;
+      max-width: 400px;
+    }
+    #qrcode {
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <h2>Sweetcoin Merchant QR Generator</h2>
+  <p>Enter your wallet address to generate a QR code that requests <strong>1 SWTC</strong> from the user.</p>
+  <input type="text" id="wallet" placeholder="Enter your wallet address" />
+  <br/>
+  <button onclick="generateQR()">Generate QR Code</button>
+  
+    <div id="qrcode"></div>
+    <p style="margin-top:1rem;font-weight:bold;color:#333;">请使用 MetaMask 扫描此二维码付款 1 SWTC。</p>
+    
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script>
+    const tokenAddress = "0x423cb73772b3c45eab15bba33a5cb3188a512dd6";
+    const amountWei = "1000000000000000000";
+
+    function generateQR() {
+      const wallet = document.getElementById("wallet").value.trim();
+      if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
+        alert("Please enter a valid Ethereum/BSC wallet address.");
+        return;
+      }
+
+      const url = `https://metamask.app.link/send/${tokenAddress}?value=${amountWei}&to=${wallet}`;
+      const qr = new QRious({
+        element: document.createElement("canvas"),
+        value: url,
+        size: 256
+      });
+
+      const container = document.getElementById("qrcode");
+      container.innerHTML = "<p>Scan this QR code with a wallet app:</p>";
+      container.appendChild(qr.element);
+    }
+  </script>
+</body>
+</html>
