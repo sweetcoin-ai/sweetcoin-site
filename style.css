@@ -31,12 +31,19 @@ body {
 }
 
 .btn {
-  font-size: 1.2em;
-  padding: 12px 24px;
-  margin: 10px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: bold;
+    background-color: #28a745 !important;
+    color: white !important;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.btn:hover {
+    background-color: #218838 !important;
 }
 
 .btn.gold {
@@ -259,12 +266,20 @@ footer a:hover {
   }
 
   .hero-buttons .btn {
-    width: auto;
-    min-width: 200px;
-    max-width: 90%;
-    text-align: center;
-    white-space: nowrap;
-  }
+    background-color: #28a745 !important;
+    color: white !important;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.btn:hover {
+    background-color: #218838 !important;
+}
 
 
   .hero-buttons {
@@ -275,9 +290,20 @@ footer a:hover {
   }
 
   .hero-buttons .btn {
-    width: 90%;
-    text-align: center;
-  }
+    background-color: #28a745 !important;
+    color: white !important;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.btn:hover {
+    background-color: #218838 !important;
+}
 
   .container {
     padding: 0 16px;
@@ -293,9 +319,20 @@ footer a:hover {
   }
 
   .btn {
-    font-size: 1em;
+    background-color: #28a745 !important;
+    color: white !important;
+    border: none;
     padding: 10px 20px;
-  }
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.btn:hover {
+    background-color: #218838 !important;
+}
 
   img {
     max-width: 100%;
@@ -320,15 +357,19 @@ footer a:hover {
 }
 
 .hero-buttons .btn {
-  min-width: 220px;
-  width: 80%;
-  max-width: 320px;
-  padding: 14px 24px;
-  font-size: 1rem;
-  text-align: center;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
+    background-color: #28a745 !important;
+    color: white !important;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.btn:hover {
+    background-color: #218838 !important;
 }
 
 .yellow-btn {
@@ -350,9 +391,18 @@ footer a:hover {
   }
 
   .hero-buttons .btn {
-    width: 220px;
-    max-width: 90%;
-    text-align: center;
-    white-space: nowrap;
-  }
+    background-color: #28a745 !important;
+    color: white !important;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.btn:hover {
+    background-color: #218838 !important;
+}
 }
