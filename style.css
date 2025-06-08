@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-family: 'Arial', sans-serif;
-  background-color: #fff;
+  background-color: #28a745;
   color: #111;
 }
 
@@ -40,13 +40,13 @@ body {
 }
 
 .btn.gold {
-  background-color: #ffcc33;
+  background-color: #28a745;
   color: #111;
   width: 260px;
 }
 
 .btn.navy {
-  background-color: #223355;
+  background-color: #28a745;
   color: white;
   width: 220px;
 }
@@ -229,7 +229,7 @@ body {
 
 /* 第七区：Footer 样式 */
 footer {
-  background: #000;
+  background: #28a745;
   padding: 40px 20px;
   color: #ccc;
   text-align: center;
@@ -332,12 +332,12 @@ footer a:hover {
 }
 
 .yellow-btn {
-  background-color: #fcd34d;
+  background-color: #28a745;
   color: #000;
 }
 
 .dark-btn {
-  background-color: #1f2937;
+  background-color: #28a745;
   color: #fff;
 }
 /* 调整第一区按钮宽度和间距（移动端） */
