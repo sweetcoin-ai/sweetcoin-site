@@ -18,7 +18,7 @@
       line-height: 1.8;
       text-align: center;
     }
-    .btn-yellow {
+    .btn {
       background-color: #facc15;
       color: #000;
       padding: 12px 28px;
@@ -56,17 +56,17 @@
 <section class="container" id="introSection">
   <h1>Claim Sweetcoin (SWTC)</h1>
   <p>Why choose Sweetcoin?</p>
-  <ul style="text-align: left; max-width: 600px; margin: auto;">
+  <ul >
     <li>💎 A decentralized stablecoin governed by AI — no banks or governments.</li>
     <li>🍦 Pegged to the global average price of an ice cream cone — fair and intuitive.</li>
     <li>🧠 AI and public consensus ensure transparency — no central control, no hidden rules.</li>
     <li>🚀 Real-world payments with QR support and fast transactions via BSC.</li>
     <li>🌍 Designed to become a universal unit of value in decentralized commerce.</li>
   </ul>
-  <p style="margin-top: 20px;">
+  <p >
     Be among the first holders. Get 20 free SWTC now and join the financial future.
   </p>
-  <div style="margin-top: 30px;">
+  <div >
     <button id="connectBtn" class="btn" onclick="revealClaim()">I understand, continue</button>
   </div>
 </section>
@@ -75,7 +75,7 @@
   <h2>Claim Your Tokens</h2>
   <p>Click the button below to connect your wallet and claim <strong>20 SWTC</strong>.</p>
   <button id="actionButton" class="btn">Connect Wallet</button>
-  <p id="statusMessage" style="margin-top: 20px; color: #333;"></p>
+  <p id="statusMessage" ></p>
 </section>
 
 <footer>
@@ -146,8 +146,8 @@
 </script>
 
 <!-- Wallet Fallback Options -->
-<div id="walletOptions" style="display:none; margin-top: 20px;">
-  <p style="font-weight:bold;">No wallet detected. Choose one:</p>
+<div id="walletOptions" >
+  <p >No wallet detected. Choose one:</p>
   <button onclick="openMetaMask()">Open in MetaMask</button>
   <button onclick="openTrustWallet()">Open in Trust Wallet</button>
 </div>
@@ -192,8 +192,8 @@
 
 
 <!-- Wallet Fallback Options -->
-<div id="walletOptions" style="display:none; margin-top: 20px;">
-  <p style="font-weight:bold;">No wallet detected. Choose one:</p>
+<div id="walletOptions" >
+  <p >No wallet detected. Choose one:</p>
   <button onclick="openMetaMask()">Open in MetaMask</button>
   <button onclick="openTrustWallet()">Open in Trust Wallet</button>
 </div>
@@ -241,8 +241,7 @@
 
 
 <!-- Wallet Detection Toast -->
-<div id="walletToast" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
-  background:#333; color:#fff; padding:10px 20px; border-radius:5px; font-size:14px; z-index:999;">
+<div id="walletToast" >
 </div>
 
 <script>
@@ -294,8 +293,7 @@
 
 
 <!-- Auto-Connect & Auto-Claim -->
-<div id="walletToast" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
-  background:#333; color:#fff; padding:10px 20px; border-radius:5px; font-size:14px; z-index:999;">
+<div id="walletToast" >
 </div>
 
 <script>
@@ -336,8 +334,7 @@
 
 
 <!-- Auto Claim with Fallback Prompt (v17) -->
-<div id="walletFallback" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
-  background:#333; color:#fff; padding:12px 24px; border-radius:6px; font-size:15px; z-index:999;">
+<div id="walletFallback" >
   ❌ No wallet detected. Please install MetaMask or Trust Wallet, or open this site in a crypto wallet browser.
 </div>
 
@@ -390,8 +387,7 @@
 
 
 <!-- Auto Claim with Wallet Detection and Tab Overflow Handling (v19) -->
-<div id="tabOverflowNotice" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
-  background:#333; color:#fff; padding:14px 24px; border-radius:6px; font-size:15px; z-index:999;">
+<div id="tabOverflowNotice" >
   请关闭钱包中的其他标签页后再次打开此页面。
 </div>
 
