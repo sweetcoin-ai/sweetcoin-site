@@ -17,7 +17,7 @@
 </head>
 <body>
   <h2>Submit Your Store</h2>
-  <form action="submitted.html" method="get">
+  <form id="merchantForm">
     <label>Store Name</label>
     <input type="text" name="store" required>
 
@@ -32,5 +32,27 @@
 
     <button type="submit">Submit</button>
   </form>
+
+  <script type="module">
+    import {{ db, addDoc, collection }} from './firebase-init.js';
+    document.getElementById("merchantForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = {{
+        name: form.store.value,
+        address: form.address.value,
+        wallet: form.wallet.value,
+        remarks: form.remarks.value,
+        status: "pending",
+        createdAt: new Date().toISOString()
+      }};
+      try {{
+        await addDoc(collection(db, "merchants"), data);
+        window.location.href = "submitted.html";
+      }} catch (err) {{
+        alert("Submission failed: " + err);
+      }}
+    });
+  </script>
 </body>
 </html>
