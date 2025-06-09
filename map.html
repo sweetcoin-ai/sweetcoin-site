@@ -1,21 +1,69 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8" />
   <title>Sweetcoin Merchant Map</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map { height: 100vh; width: 100%; }
-    .leaflet-popup-content { font-size: 14px; line-height: 1.4; }
+    html, body, #map { height: 100%; margin: 0; }
+    .popup-form input, .popup-form textarea, .popup-form button {
+      display: block; width: 100%; margin-top: 5px; padding: 5px;
+    }
+    .popup-form button {
+      background-color: #28a745; color: white; border: none; cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="map.js"></script>
+  <script type="module">
+    import { db, addDoc, collection } from './firebase-init.js';
+    const map = L.map('map').setView([43.6532, -79.3832], 13); // Default to Toronto
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    map.on('click', function(e) {
+      const popup = L.popup()
+        .setLatLng(e.latlng)
+        .setContent(`
+          <form class="popup-form">
+            <strong>Apply to Join Sweetcoin Map</strong><br/>
+            <input type="text" placeholder="Store Name" id="storeName" required />
+            <input type="text" placeholder="Wallet Address" id="wallet" required />
+            <textarea placeholder="Remarks" id="remarks"></textarea>
+            <button type="button" onclick="submitApplication(${e.latlng.lat}, ${e.latlng.lng})">Submit</button>
+          </form>
+        `)
+        .openOn(map);
+    });
+
+    window.submitApplication = async function(lat, lng) {
+      const name = document.getElementById("storeName").value;
+      const wallet = document.getElementById("wallet").value;
+      const remarks = document.getElementById("remarks").value;
+      if (!name || !wallet) {
+        alert("Store name and wallet address are required.");
+        return;
+      }
+      try {
+        await addDoc(collection(db, "merchants"), {
+          name, wallet, remarks,
+          lat, lng,
+          status: "pending",
+          createdAt: new Date().toISOString()
+        });
+        alert("✅ Submitted! Awaiting approval.");
+        map.closePopup();
+      } catch (err) {
+        alert("Submission failed: " + err);
+      }
+    }
+  </script>
 </body>
 </html>
