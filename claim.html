@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Claim Sweetcoin</title>
   <link rel="stylesheet" href="style.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <style>
     body { font-family: sans-serif; }
     .container {
@@ -40,7 +38,6 @@
       text-align: center;
     }
   </style>
-<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
@@ -56,17 +53,17 @@
 <section class="container" id="introSection">
   <h1>Claim Sweetcoin (SWTC)</h1>
   <p>Why choose Sweetcoin?</p>
-  <ul >
+  <ul>
     <li>💎 A decentralized stablecoin governed by AI — no banks or governments.</li>
     <li>🍦 Pegged to the global average price of an ice cream cone — fair and intuitive.</li>
     <li>🧠 AI and public consensus ensure transparency — no central control, no hidden rules.</li>
     <li>🚀 Real-world payments with QR support and fast transactions via BSC.</li>
     <li>🌍 Designed to become a universal unit of value in decentralized commerce.</li>
   </ul>
-  <p >
+  <p>
     Be among the first holders. Get 20 free SWTC now and join the financial future.
   </p>
-  <div >
+  <div>
     <button id="connectBtn" class="btn" onclick="revealClaim()">I understand, continue</button>
   </div>
 </section>
@@ -75,7 +72,7 @@
   <h2>Claim Your Tokens</h2>
   <p>Click the button below to connect your wallet and claim <strong>20 SWTC</strong>.</p>
   <button id="actionButton" class="btn">Connect Wallet</button>
-  <p id="statusMessage" ></p>
+  <p id="statusMessage"></p>
 </section>
 
 <footer>
@@ -136,7 +133,12 @@
         button.disabled = true;
       }
     } catch (err) {
-      status.textContent = "Error: " + (err.error?.message || err.message);
+      const msg = err?.error?.message || err.message || "";
+      if (msg.includes("execution reverted") || msg.toLowerCase().includes("already claimed") || msg.includes("JSON-RPC")) {
+        status.textContent = "您已经领取过了。";
+      } else {
+        status.textContent = "Error: " + msg;
+      }
       button.disabled = false;
       actionLocked = false;
     }
@@ -145,309 +147,5 @@
   document.getElementById("actionButton").addEventListener("click", handleAction);
 </script>
 
-<!-- Wallet Fallback Options -->
-<div id="walletOptions" >
-  <p >No wallet detected. Choose one:</p>
-  <button onclick="openMetaMask()">Open in MetaMask</button>
-  <button onclick="openTrustWallet()">Open in Trust Wallet</button>
-</div>
-
-<style>
-  #walletOptions button {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    padding: 8px 15px;
-    margin-right: 10px;
-    font-weight: bold;
-    border-radius: 5px;
-  }
-</style>
-
-<script>
-  async function connectWallet() {
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        
-      } catch (err) {
-        console.error(err);
-        
-      }
-    } else {
-      
-      document.getElementById('walletOptions').style.display = 'block';
-    }
-  }
-
-  function openMetaMask() {
-    window.location.href = `https://metamask.app.link/dapp/${window.location.hostname}/claim.html`;
-  }
-
-  function openTrustWallet() {
-    window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=https://${window.location.hostname}/claim.html`;
-  }
-
-  document.getElementById('connectBtn')?.addEventListener('click', connectWallet);
-</script>
-
-
-<!-- Wallet Fallback Options -->
-<div id="walletOptions" >
-  <p >No wallet detected. Choose one:</p>
-  <button onclick="openMetaMask()">Open in MetaMask</button>
-  <button onclick="openTrustWallet()">Open in Trust Wallet</button>
-</div>
-
-<style>
-  #walletOptions button {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    padding: 8px 15px;
-    margin-right: 10px;
-    font-weight: bold;
-    border-radius: 5px;
-  }
-</style>
-
-<script>
-  async function connectWallet() {
-    const connectBtn = document.getElementById('connectBtn');
-    const walletOptions = document.getElementById('walletOptions');
-
-    if (typeof window.ethereum !== 'undefined' && typeof window.ethereum.request === 'function') {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        
-      } catch (err) {
-        console.error(err);
-        
-      }
-    } else {
-      
-      if (walletOptions) walletOptions.style.display = 'block';
-    }
-  }
-
-  function openMetaMask() {
-    window.location.href = `https://metamask.app.link/dapp/${window.location.hostname}/claim.html`;
-  }
-
-  function openTrustWallet() {
-    window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=https://${window.location.hostname}/claim.html`;
-  }
-
-  document.getElementById('connectBtn')?.addEventListener('click', connectWallet);
-</script>
-
-
-<!-- Wallet Detection Toast -->
-<div id="walletToast" >
-</div>
-
-<script>
-  function showToast(msg) {
-    const toast = document.getElementById('walletToast');
-    toast.textContent = msg;
-    toast.style.display = 'block';
-    setTimeout(() => {
-      toast.style.display = 'none';
-    }, 3000);
-  }
-
-  async function connectWallet() {
-    const isEthereumAvailable = typeof window.ethereum !== 'undefined';
-
-    if (isEthereumAvailable) {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        showToast("Wallet connected: " + accounts[0]);
-        // 可添加自动领取逻辑
-      } catch (err) {
-        console.error(err);
-        showToast("Wallet connection failed.");
-      }
-    } else {
-      // 非钱包内浏览器，尝试唤起钱包 app
-      const domain = window.location.hostname;
-      const dappUrl = `https://${domain}/claim.html`;
-
-      // 尝试打开 MetaMask
-      const metamaskUrl = `https://metamask.app.link/dapp/${domain}/claim.html`;
-      window.location.href = metamaskUrl;
-
-      // 若 MetaMask 未响应，Trust Wallet 会作为备选
-      setTimeout(() => {
-        const trustUrl = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
-        window.location.href = trustUrl;
-      }, 3000); // 等待3秒后尝试 Trust Wallet
-
-      // 若都失败，显示提示（预防用户停留在普通浏览器）
-      setTimeout(() => {
-        showToast("No wallet detected. Please open this site in a wallet app.");
-      }, 6000);
-    }
-  }
-
-  document.getElementById('connectBtn')?.addEventListener('click', connectWallet);
-</script>
-
-
-<!-- Auto-Connect & Auto-Claim -->
-<div id="walletToast" >
-</div>
-
-<script>
-  function showToast(msg) {
-    const toast = document.getElementById('walletToast');
-    toast.textContent = msg;
-    toast.style.display = 'block';
-    setTimeout(() => {
-      toast.style.display = 'none';
-    }, 3000);
-  }
-
-  const CONTRACT_ABI = ["function claim() external"];
-  const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS";
-  let provider, signer, contract, claimed = false;
-
-  async function autoConnectAndClaim() {
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
-        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-        if (!claimed) {
-          const tx = await contract.claim();
-          showToast("✅ 20 SWTC Claimed!");
-          claimed = true;
-        }
-      } catch (err) {
-        console.error(err);
-        showToast("❌ Claim failed");
-      }
-    }
-  }
-
-  window.addEventListener('load', autoConnectAndClaim);
-</script>
-
-
-<!-- Auto Claim with Fallback Prompt (v17) -->
-<div id="walletFallback" >
-  ❌ No wallet detected. Please install MetaMask or Trust Wallet, or open this site in a crypto wallet browser.
-</div>
-
-<script>
-  const CONTRACT_ABI = ["function claim() external"];
-  const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS"; // 替换为真实地址
-
-  async function connectAndClaim() {
-    try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      await contract.claim();
-      console.log("✅ Claimed via injected wallet.");
-    } catch (err) {
-      console.error("Claim failed:", err);
-    }
-  }
-
-  async function autoWalletHandler() {
-    if (typeof window.ethereum !== 'undefined') {
-      await connectAndClaim();
-    } else {
-      const domain = window.location.hostname;
-      const dappUrl = `https://${domain}/claim.html`;
-      const metamaskUrl = `https://metamask.app.link/dapp/${domain}/claim.html`;
-      const trustUrl = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
-
-      // 尝试 MetaMask
-      window.location.href = metamaskUrl;
-
-      // 尝试 Trust Wallet
-      setTimeout(() => {
-        window.location.href = trustUrl;
-      }, 1500);
-
-      // 显示兜底提示（延迟 3.5 秒后仍然未注入 window.ethereum）
-      setTimeout(() => {
-        if (typeof window.ethereum === 'undefined') {
-          const fallback = document.getElementById('walletFallback');
-          fallback.style.display = 'block';
-        }
-      }, 3500);
-    }
-  }
-
-  window.addEventListener('load', autoWalletHandler);
-</script>
-
-
-<!-- Auto Claim with Wallet Detection and Tab Overflow Handling (v19) -->
-<div id="tabOverflowNotice" >
-  请关闭钱包中的其他标签页后再次打开此页面。
-</div>
-
-<script>
-  const CONTRACT_ABI = ["function claim() external"];
-  const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS"; // 替换为真实地址
-
-  function showOverflowNotice() {
-    const msg = document.getElementById('tabOverflowNotice');
-    if (msg) msg.style.display = 'block';
-  }
-
-  async function connectAndClaim() {
-    try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      await contract.claim();
-      console.log("✅ Claimed.");
-    } catch (err) {
-      console.error("Claim error:", err);
-    }
-  }
-
-  function isInWalletBrowser() {
-    const ua = navigator.userAgent.toLowerCase();
-    return ua.includes("metamask") || ua.includes("trust") || ua.includes("coinbase");
-  }
-
-  async function autoWalletHandler() {
-    if (typeof window.ethereum !== 'undefined') {
-      await connectAndClaim();
-    } else {
-      const domain = window.location.hostname;
-      const dappUrl = `https://${domain}/claim.html`;
-      const metamaskUrl = `https://metamask.app.link/dapp/${domain}/claim.html`;
-      const trustUrl = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
-
-      if (isInWalletBrowser()) {
-        // 强制原页跳转
-        window.location.replace(metamaskUrl);
-        setTimeout(() => {
-          window.location.replace(trustUrl);
-        }, 1500);
-      } else {
-        // 不是钱包浏览器，正常跳转并兜底提示
-        window.location.href = metamaskUrl;
-        setTimeout(() => {
-          window.location.href = trustUrl;
-        }, 1500);
-        setTimeout(() => {
-          showOverflowNotice();
-        }, 3500);
-      }
-    }
-  }
-
-  window.addEventListener('load', autoWalletHandler);
-</script>
-
-
 </body>
+</html>
