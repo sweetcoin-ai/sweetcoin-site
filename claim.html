@@ -73,7 +73,7 @@
     Be among the first holders. Get 20 free SWTC now and join the financial future.
   </p>
   <div>
-    <button id="connectBtn" class="btn" onclick="revealClaim()">I understand, continue</button>
+    <button id="connectBtn" class="btn">I understand, continue</button>
   </div>
 </section>
 
@@ -105,23 +105,33 @@
   };
   let actionLocked = false;
 
-  function revealClaim() {
-    const intro = document.getElementById("introSection");
-    intro.classList.add("fade-out");
-    setTimeout(() => {
-      intro.classList.add("hidden");
-      document.getElementById("claimSection").classList.remove("hidden");
-    }, 1000);
+  function showClaimSection() {
+    document.getElementById("introSection").classList.add("hidden");
+    document.getElementById("claimSection").classList.remove("hidden");
   }
 
+  document.addEventListener("DOMContentLoaded", () => {
+    const hasSeenIntro = localStorage.getItem("sweetcoinClaimIntroSeen") === "1";
+    if (hasSeenIntro) {
+      showClaimSection();
+    }
+
+    document.getElementById("connectBtn").addEventListener("click", () => {
+      localStorage.setItem("sweetcoinClaimIntroSeen", "1");
+      showClaimSection();
+    });
+
+    document.getElementById("actionButton").addEventListener("click", handleAction);
+  });
+
   function openMetaMask() {
-    const domain = window.location.hostname;
-    window.location.href = `https://metamask.app.link/dapp/${domain}/claim.html`;
+    const fullURL = window.location.href;
+    const domain = fullURL.replace(/^https?:\/\//, '');
+    window.location.href = `https://metamask.app.link/dapp/${domain}`;
   }
 
   function openTrustWallet() {
-    const domain = window.location.hostname;
-    const dappUrl = `https://${domain}/claim.html`;
+    const dappUrl = window.location.href;
     window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
   }
 
@@ -173,7 +183,8 @@
       status.textContent = "Claiming 20 SWTC...";
       const tx = await contract.claim();
       await tx.wait();
-      status.textContent = "✅ Success! 20 SWTC claimed.";
+      status.textContent = "✅ Success! 20 SWTC claimed. You may now close your wallet app.";
+
       button.disabled = true;
 
     } catch (err) {
@@ -188,8 +199,6 @@
 
     actionLocked = false;
   }
-
-  document.getElementById("actionButton").addEventListener("click", handleAction);
 </script>
 
 </body>
