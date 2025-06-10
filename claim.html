@@ -96,73 +96,54 @@
     }, 1000);
   }
 
-  function openInWalletApp() {
-    const domain = window.location.hostname;
-    const dappUrl = `https://${domain}/claim.html`;
+async function handleAction() {
+  const button = document.getElementById("actionButton");
+  const status = document.getElementById("statusMessage");
 
-    // 跳转 MetaMask
-    const metamaskUrl = `https://metamask.app.link/dapp/${domain}/claim.html`;
-    window.location.href = metamaskUrl;
+  if (actionLocked) return;
+  actionLocked = true;
+  button.disabled = true;
 
-    // 等待 2 秒再跳 Trust Wallet（作为备选）
-    setTimeout(() => {
-      const trustUrl = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
-      window.location.href = trustUrl;
-    }, 2000);
+  if (typeof window.ethereum === "undefined" || typeof window.ethereum.request !== "function") {
+    status.textContent = "No wallet detected. Trying to open wallet app...";
+    openInWalletApp();
+    return;
   }
 
-  async function handleAction() {
-    const button = document.getElementById("actionButton");
-    const status = document.getElementById("statusMessage");
+  try {
+    status.textContent = "Connecting wallet...";
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    signer = provider.getSigner();
+    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    const userAddress = await signer.getAddress();
 
-    if (actionLocked) return;
-    actionLocked = true;
-    button.disabled = true;
-
-    if (typeof window.ethereum === "undefined" || typeof window.ethereum.request !== "function") {
-      status.textContent = "No wallet detected. Trying to open wallet app...";
-      openInWalletApp();
+    const network = await provider.getNetwork();
+    if (network.chainId !== 56) {
+      status.textContent = "Please switch to BSC Mainnet.";
+      button.disabled = false;
+      actionLocked = false;
       return;
     }
 
-    try {
-      if (!walletConnected) {
-        status.textContent = "Waiting for wallet...";
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
-        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-        const userAddress = await signer.getAddress();
-        status.textContent = "Connected: " + userAddress;
-        walletConnected = true;
-        button.textContent = "Claim 20 SWTC";
-        button.disabled = false;
-        actionLocked = false;
-      } else if (!claimed) {
-        const network = await provider.getNetwork();
-        if (network.chainId !== 56) {
-          status.textContent = "Please switch to BSC Mainnet.";
-          button.disabled = false;
-          actionLocked = false;
-          return;
-        }
-        status.textContent = "Processing transaction...";
-        const tx = await contract.claim();
-        await tx.wait();
-        status.textContent = "Success! 20 SWTC claimed 🎉";
-        claimed = true;
-        button.disabled = true;
-      }
-    } catch (err) {
-      const msg = err?.error?.message || err.message || "";
-      if (msg.includes("execution reverted") || msg.toLowerCase().includes("already claimed") || msg.includes("JSON-RPC")) {
-        status.textContent = "You have already claimed your tokens.";
-      } else {
-        status.textContent = "Error: " + msg;
-      }
-      button.disabled = false;
-      actionLocked = false;
+    status.textContent = "Processing claim transaction...";
+    const tx = await contract.claim();
+    await tx.wait();
+    status.textContent = "Success! 20 SWTC claimed 🎉";
+    button.disabled = true;
+  } catch (err) {
+    const msg = err?.error?.message || err.message || "";
+    if (msg.includes("execution reverted") || msg.toLowerCase().includes("already claimed") || msg.includes("JSON-RPC")) {
+      status.textContent = "You have already claimed your tokens.";
+    } else {
+      status.textContent = "Error: " + msg;
     }
+    button.disabled = false;
+  }
+
+  actionLocked = false;
+}
+
   }
 
   document.getElementById("actionButton").addEventListener("click", handleAction);
