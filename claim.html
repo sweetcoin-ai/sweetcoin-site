@@ -25,10 +25,7 @@
       cursor: pointer;
       text-decoration: none;
     }
-    .fade-out {
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
+    .fade-out { opacity: 0; transition: opacity 1s ease; }
     .hidden { display: none; }
     footer {
       margin-top: 60px;
@@ -69,9 +66,7 @@
     <li>🚀 Real-world payments with QR support and fast transactions via BSC.</li>
     <li>🌍 Designed to become a universal unit of value in decentralized commerce.</li>
   </ul>
-  <p>
-    Be among the first holders. Get 20 free SWTC now and join the financial future.
-  </p>
+  <p>Be among the first holders. Get 20 free SWTC now and join the financial future.</p>
   <div>
     <button id="connectBtn" class="btn">I understand, continue</button>
   </div>
@@ -110,31 +105,6 @@
     document.getElementById("claimSection").classList.remove("hidden");
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const hasSeenIntro = localStorage.getItem("sweetcoinClaimIntroSeen") === "1";
-    if (hasSeenIntro) {
-      showClaimSection();
-    }
-
-    document.getElementById("connectBtn").addEventListener("click", () => {
-      localStorage.setItem("sweetcoinClaimIntroSeen", "1");
-      showClaimSection();
-    });
-
-    document.getElementById("actionButton").addEventListener("click", handleAction);
-  });
-
-  function openMetaMask() {
-    const fullURL = window.location.href;
-    const domain = fullURL.replace(/^https?:\/\//, '');
-    window.location.href = `https://metamask.app.link/dapp/${domain}`;
-  }
-
-  function openTrustWallet() {
-    const dappUrl = window.location.href;
-    window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
-  }
-
   async function handleAction() {
     const button = document.getElementById("actionButton");
     const status = document.getElementById("statusMessage");
@@ -142,12 +112,12 @@
 
     if (actionLocked) return;
     actionLocked = true;
-    button.disabled = true;
+    if (button) button.disabled = true;
 
     if (typeof window.ethereum === "undefined" || typeof window.ethereum.request !== "function") {
       status.textContent = "No wallet detected. Please open in MetaMask or Trust Wallet:";
       walletLinks.classList.remove("hidden");
-      button.disabled = false;
+      if (button) button.disabled = false;
       actionLocked = false;
       return;
     }
@@ -184,8 +154,7 @@
       const tx = await contract.claim();
       await tx.wait();
       status.textContent = "✅ Success! 20 SWTC claimed. You may now close your wallet app.";
-
-      button.disabled = true;
+      if (button) button.disabled = true;
 
     } catch (err) {
       const msg = err?.error?.message || err.message || "";
@@ -194,11 +163,45 @@
       } else {
         status.textContent = "Error: " + msg;
       }
-      button.disabled = false;
+      if (button) button.disabled = false;
     }
 
     actionLocked = false;
   }
+
+  function openMetaMask() {
+    const fullURL = window.location.href;
+    const domain = fullURL.replace(/^https?:\/\//, '');
+    window.location.href = `https://metamask.app.link/dapp/${domain}`;
+  }
+
+  function openTrustWallet() {
+    const dappUrl = window.location.href;
+    window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
+  }
+
+  // 自动跳过介绍 & 自动领取逻辑
+  document.addEventListener("DOMContentLoaded", async () => {
+    const hasSeenIntro = localStorage.getItem("sweetcoinClaimIntroSeen") === "1";
+    if (hasSeenIntro) showClaimSection();
+
+    document.getElementById("connectBtn")?.addEventListener("click", () => {
+      localStorage.setItem("sweetcoinClaimIntroSeen", "1");
+      showClaimSection();
+    });
+
+    document.getElementById("actionButton")?.addEventListener("click", handleAction);
+
+    // ✅ 自动领取逻辑：如已连接钱包，直接尝试领取
+    if (typeof window.ethereum !== 'undefined') {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts.length > 0) {
+        localStorage.setItem("sweetcoinClaimIntroSeen", "1");
+        showClaimSection();
+        handleAction();
+      }
+    }
+  });
 </script>
 
 </body>
