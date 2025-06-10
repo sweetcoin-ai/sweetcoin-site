@@ -135,7 +135,7 @@
     } catch (err) {
       const msg = err?.error?.message || err.message || "";
       if (msg.includes("execution reverted") || msg.toLowerCase().includes("already claimed") || msg.includes("JSON-RPC")) {
-        status.textContent = "您已经领取过了。";
+        status.textContent = "You have already claimed your tokens.";
       } else {
         status.textContent = "Error: " + msg;
       }
