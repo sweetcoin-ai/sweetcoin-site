@@ -96,7 +96,13 @@
 <script>
   const CONTRACT_ADDRESS = "0x005A04acdC294f20f7Ab60fd51525299838393B3";
   const CONTRACT_ABI = ["function claim() external"];
-  let provider, signer, contract;
+  const BSC_PARAMS = {
+    chainId: '0x38',
+    chainName: 'Binance Smart Chain Mainnet',
+    nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+    rpcUrls: ['https://bsc-dataseed.binance.org/'],
+    blockExplorerUrls: ['https://bscscan.com']
+  };
   let actionLocked = false;
 
   function revealClaim() {
@@ -139,23 +145,37 @@
     try {
       status.textContent = "Connecting wallet...";
       await window.ethereum.request({ method: "eth_requestAccounts" });
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      signer = provider.getSigner();
-      contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
-      const network = await provider.getNetwork();
-      if (network.chainId !== 56) {
-        status.textContent = "Please switch to BSC Mainnet.";
-        button.disabled = false;
-        actionLocked = false;
-        return;
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: BSC_PARAMS.chainId }]
+        });
+      } catch (switchErr) {
+        if (switchErr.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [BSC_PARAMS]
+          });
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: BSC_PARAMS.chainId }]
+          });
+        } else {
+          throw switchErr;
+        }
       }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
       status.textContent = "Claiming 20 SWTC...";
       const tx = await contract.claim();
       await tx.wait();
       status.textContent = "✅ Success! 20 SWTC claimed.";
       button.disabled = true;
+
     } catch (err) {
       const msg = err?.error?.message || err.message || "";
       if (msg.includes("execution reverted") || msg.toLowerCase().includes("already claimed") || msg.includes("JSON-RPC")) {
