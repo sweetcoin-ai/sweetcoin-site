@@ -36,6 +36,15 @@
       background: #f4f4f4;
       text-align: center;
     }
+    .wallet-links button {
+      margin: 8px;
+      padding: 10px 20px;
+      border: none;
+      background: #ddd;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -71,8 +80,13 @@
 <section class="container hidden" id="claimSection">
   <h2>Claim Your Tokens</h2>
   <p>Click the button below to connect your wallet and claim <strong>20 SWTC</strong>.</p>
-  <button id="actionButton" class="btn">Connect Wallet</button>
+  <button id="actionButton" class="btn">Claim 20 SWTC</button>
   <p id="statusMessage"></p>
+  <div id="walletLinks" class="wallet-links hidden">
+    <p>Please open this site in a wallet app:</p>
+    <button onclick="openMetaMask()">Open in MetaMask</button>
+    <button onclick="openTrustWallet()">Open in Trust Wallet</button>
+  </div>
 </section>
 
 <footer>
@@ -83,8 +97,6 @@
   const CONTRACT_ADDRESS = "0x005A04acdC294f20f7Ab60fd51525299838393B3";
   const CONTRACT_ABI = ["function claim() external"];
   let provider, signer, contract;
-  let walletConnected = false;
-  let claimed = false;
   let actionLocked = false;
 
   function revealClaim() {
@@ -96,53 +108,66 @@
     }, 1000);
   }
 
-async function handleAction() {
-  const button = document.getElementById("actionButton");
-  const status = document.getElementById("statusMessage");
-
-  if (actionLocked) return;
-  actionLocked = true;
-  button.disabled = true;
-
-  if (typeof window.ethereum === "undefined" || typeof window.ethereum.request !== "function") {
-    status.textContent = "No wallet detected. Trying to open wallet app...";
-    openInWalletApp();
-    return;
+  function openMetaMask() {
+    const domain = window.location.hostname;
+    window.location.href = `https://metamask.app.link/dapp/${domain}/claim.html`;
   }
 
-  try {
-    status.textContent = "Connecting wallet...";
-    await window.ethereum.request({ method: "eth_requestAccounts" });
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    signer = provider.getSigner();
-    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-    const userAddress = await signer.getAddress();
+  function openTrustWallet() {
+    const domain = window.location.hostname;
+    const dappUrl = `https://${domain}/claim.html`;
+    window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
+  }
 
-    const network = await provider.getNetwork();
-    if (network.chainId !== 56) {
-      status.textContent = "Please switch to BSC Mainnet.";
+  async function handleAction() {
+    const button = document.getElementById("actionButton");
+    const status = document.getElementById("statusMessage");
+    const walletLinks = document.getElementById("walletLinks");
+
+    if (actionLocked) return;
+    actionLocked = true;
+    button.disabled = true;
+
+    if (typeof window.ethereum === "undefined" || typeof window.ethereum.request !== "function") {
+      status.textContent = "No wallet detected. Please open in MetaMask or Trust Wallet:";
+      walletLinks.classList.remove("hidden");
       button.disabled = false;
       actionLocked = false;
       return;
     }
 
-    status.textContent = "Processing claim transaction...";
-    const tx = await contract.claim();
-    await tx.wait();
-    status.textContent = "Success! 20 SWTC claimed 🎉";
-    button.disabled = true;
-  } catch (err) {
-    const msg = err?.error?.message || err.message || "";
-    if (msg.includes("execution reverted") || msg.toLowerCase().includes("already claimed") || msg.includes("JSON-RPC")) {
-      status.textContent = "You have already claimed your tokens.";
-    } else {
-      status.textContent = "Error: " + msg;
-    }
-    button.disabled = false;
-  }
+    try {
+      status.textContent = "Connecting wallet...";
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      signer = provider.getSigner();
+      contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
-  actionLocked = false;
-}
+      const network = await provider.getNetwork();
+      if (network.chainId !== 56) {
+        status.textContent = "Please switch to BSC Mainnet.";
+        button.disabled = false;
+        actionLocked = false;
+        return;
+      }
+
+      status.textContent = "Claiming 20 SWTC...";
+      const tx = await contract.claim();
+      await tx.wait();
+      status.textContent = "✅ Success! 20 SWTC claimed.";
+      button.disabled = true;
+    } catch (err) {
+      const msg = err?.error?.message || err.message || "";
+      if (msg.includes("execution reverted") || msg.toLowerCase().includes("already claimed") || msg.includes("JSON-RPC")) {
+        status.textContent = "You have already claimed your tokens.";
+      } else {
+        status.textContent = "Error: " + msg;
+      }
+      button.disabled = false;
+    }
+
+    actionLocked = false;
+  }
 
   document.getElementById("actionButton").addEventListener("click", handleAction);
 </script>
