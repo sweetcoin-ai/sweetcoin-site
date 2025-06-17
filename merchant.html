@@ -1,11 +1,12 @@
 
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sweetcoin Merchant QR</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sweetcoin Merchant QR</title>
+<style>
     body {
       font-family: Arial, sans-serif;
       padding: 2rem;
@@ -25,18 +26,15 @@
   </style>
 </head>
 <body>
-  <h2>Sweetcoin Merchant QR Generator</h2>
-  <p>Enter your wallet address to generate a QR code that requests <strong>1 SWTC</strong> from the user.</p>
-  <input type="text" id="wallet" placeholder="Enter your wallet address" />
-  <br/>
-  <button onclick="generateQR()">Generate QR Code</button>
-  
-    <div id="qrcode"></div>
-    <p style="margin-top:1rem;font-weight:bold;color:#333;">请使用 MetaMask 扫描此二维码付款 1 SWTC。</p>
-    
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-  <script>
+<h2>Sweetcoin Merchant QR Generator</h2>
+<p>Enter your wallet address to generate a QR code that requests <strong>1 SWTC</strong> from the user.</p>
+<input id="wallet" placeholder="Enter your wallet address" type="text"/>
+<br/>
+<button onclick="generateQR()">Generate QR Code</button>
+<div id="qrcode"></div>
+<p style="margin-top:1rem;font-weight:bold;color:#333;">请使用 MetaMask 扫描此二维码付款 1 SWTC。</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script>
     const tokenAddress = "0x423cb73772b3c45eab15bba33a5cb3188a512dd6";
     const amountWei = "1000000000000000000";
 
@@ -59,12 +57,10 @@
       container.appendChild(qr.element);
     }
   </script>
-
 <div style="text-align:center; margin-top:30px;">
-  <a href="submit.html" class="btn" style="background:#28a745; color:white; padding:10px 20px; border-radius:6px; text-decoration:none;">
+<a class="btn" href="map.html" style="background:#28a745; color:white; padding:10px 20px; border-radius:6px; text-decoration:none;">
     Submit to Map
   </a>
 </div>
-
 </body>
 </html>
