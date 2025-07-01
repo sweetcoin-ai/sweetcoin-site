@@ -1,8 +1,9 @@
-
-footer {
-  background-color: #f0f0f0;
-  padding: 15px;
-  text-align: center;
-  font-size: 14px;
-  color: #333;
+/* minimal CSS footer block to ensure links look proper */
+footer a {
+  color: #f0c040;
+  text-decoration: none;
+  margin: 0 8px;
+}
+footer a:hover {
+  text-decoration: underline;
 }
