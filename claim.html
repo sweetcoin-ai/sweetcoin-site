@@ -1,208 +1,23 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Claim Sweetcoin</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <script src="claim.js"></script>
   <style>
-    body { font-family: sans-serif; }
-    .container {
-      max-width: 800px;
-      margin: 80px auto;
-      padding: 20px;
-      font-size: 18px;
-      line-height: 1.8;
-      text-align: center;
-    }
-    .btn {
-      background-color: #facc15;
-      color: #000;
-      padding: 12px 28px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .fade-out { opacity: 0; transition: opacity 1s ease; }
-    .hidden { display: none; }
-    footer {
-      margin-top: 60px;
-      padding: 20px;
-      background: #f4f4f4;
-      text-align: center;
-    }
-    .wallet-links button {
-      margin: 8px;
-      padding: 10px 20px;
-      border: none;
-      background: #ddd;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+    #popup { display: none; background: #fff3cd; border: 1px solid #ffeeba; padding: 20px; margin-top: 20px; }
+    #popup button { margin: 5px; }
   </style>
 </head>
 <body>
-
-<header>
-  <nav>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="whitepaper.html">Whitepaper</a></li>
-      <li><a href="claim.html">Claim</a></li>
-    </ul>
-  </nav>
-</header>
-
-<section class="container" id="introSection">
-  <h1>Claim Sweetcoin (SWTC)</h1>
-  <p>Why choose Sweetcoin?</p>
-  <ul>
-    <li>💎 A decentralized stablecoin governed by AI — no banks or governments.</li>
-    <li>🍦 Pegged to the global average price of an ice cream cone — fair and intuitive.</li>
-    <li>🧠 AI and public consensus ensure transparency — no central control, no hidden rules.</li>
-    <li>🚀 Real-world payments with QR support and fast transactions via BSC.</li>
-    <li>🌍 Designed to become a universal unit of value in decentralized commerce.</li>
-  </ul>
-  <p>Be among the first holders. Get 20 free SWTC now and join the financial future.</p>
-  <div>
-    <button id="connectBtn" class="btn">I understand, continue</button>
-  </div>
-</section>
-
-<section class="container hidden" id="claimSection">
   <h2>Claim Your Tokens</h2>
-  <p>Click the button below to connect your wallet and claim <strong>20 SWTC</strong>.</p>
-  <button id="actionButton" class="btn">Claim 20 SWTC</button>
-  <p id="statusMessage"></p>
-  <div id="walletLinks" class="wallet-links hidden">
-    <p>Please open this site in a wallet app:</p>
-    <button onclick="openMetaMask()">Open in MetaMask</button>
-    <button onclick="openTrustWallet()">Open in Trust Wallet</button>
+  <button id="claimButton">Claim 20 SWTC</button>
+
+  <div id="popup">
+    <p id="popup-message"></p>
+    <button id="copyEth">Copy Ethereum Address</button>
+    <button id="copyBsc">Copy BSC Address</button>
   </div>
-</section>
-
-<footer>
-  <p>&copy; 2025 Sweetcoin. All rights reserved.</p>
-</footer>
-
-<script>
-  const CONTRACT_ADDRESS = "0x945e6aD527E19a09f6d29a7b1DD95d065a485203";
-  const CONTRACT_ABI = ["function claim() external"];
-  const BSC_PARAMS = {
-    chainId: '0x38',
-    chainName: 'Binance Smart Chain Mainnet',
-    nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-    rpcUrls: ['https://bsc-dataseed.binance.org/'],
-    blockExplorerUrls: ['https://bscscan.com']
-  };
-  let actionLocked = false;
-
-  function showClaimSection() {
-    document.getElementById("introSection").classList.add("hidden");
-    document.getElementById("claimSection").classList.remove("hidden");
-  }
-
-  async function handleAction() {
-    const button = document.getElementById("actionButton");
-    const status = document.getElementById("statusMessage");
-    const walletLinks = document.getElementById("walletLinks");
-
-    if (actionLocked) return;
-    actionLocked = true;
-    if (button) button.disabled = true;
-
-    if (typeof window.ethereum === "undefined" || typeof window.ethereum.request !== "function") {
-      status.textContent = "No wallet detected. Please open in MetaMask or Trust Wallet:";
-      walletLinks.classList.remove("hidden");
-      if (button) button.disabled = false;
-      actionLocked = false;
-      return;
-    }
-
-    try {
-      status.textContent = "Connecting wallet...";
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: BSC_PARAMS.chainId }]
-        });
-      } catch (switchErr) {
-        if (switchErr.code === 4902) {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [BSC_PARAMS]
-          });
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: BSC_PARAMS.chainId }]
-          });
-        } else {
-          throw switchErr;
-        }
-      }
-
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-      status.textContent = "Claiming 20 SWTC...";
-      const tx = await contract.claim();
-      await tx.wait();
-      status.textContent = "✅ Success! 20 SWTC claimed. You may now close your wallet app.";
-      if (button) button.disabled = true;
-
-    } catch (err) {
-      const msg = err?.error?.message || err.message || "";
-      if (msg.includes("execution reverted") || msg.toLowerCase().includes("already claimed") || msg.includes("JSON-RPC")) {
-        status.textContent = "You have already claimed your tokens.";
-      } else {
-        status.textContent = "Error: " + msg;
-      }
-      if (button) button.disabled = false;
-    }
-
-    actionLocked = false;
-  }
-
-  function openMetaMask() {
-    const fullURL = window.location.href;
-    const domain = fullURL.replace(/^https?:\/\//, '');
-    window.location.href = `https://metamask.app.link/dapp/${domain}`;
-  }
-
-  function openTrustWallet() {
-    const dappUrl = window.location.href;
-    window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(dappUrl)}`;
-  }
-
-  // 自动跳过介绍 & 自动领取逻辑
-  document.addEventListener("DOMContentLoaded", async () => {
-    const hasSeenIntro = localStorage.getItem("sweetcoinClaimIntroSeen") === "1";
-    if (hasSeenIntro) showClaimSection();
-
-    document.getElementById("connectBtn")?.addEventListener("click", () => {
-      localStorage.setItem("sweetcoinClaimIntroSeen", "1");
-      showClaimSection();
-    });
-
-    document.getElementById("actionButton")?.addEventListener("click", handleAction);
-
-    // ✅ 自动领取逻辑：如已连接钱包，直接尝试领取
-    if (typeof window.ethereum !== 'undefined') {
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-      if (accounts.length > 0) {
-        localStorage.setItem("sweetcoinClaimIntroSeen", "1");
-        showClaimSection();
-        handleAction();
-      }
-    }
-  });
-</script>
-
 </body>
 </html>
