@@ -1,13 +1,12 @@
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
 import {
   getFirestore, addDoc, collection
 } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD8xeABxQKvI7q32M1w3XV3Gjtnv94bQvA",
-  authDomain: "sweetcoin-b4af9.firebaseapp.com",
-  projectId: "sweetcoin-b4af9"
+  apiKey: window.env.FIREBASE_API_KEY,
+  authDomain: window.env.FIREBASE_AUTH_DOMAIN,
+  projectId: window.env.FIREBASE_PROJECT_ID
 };
 
 const app = initializeApp(firebaseConfig);
