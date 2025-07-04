@@ -1,55 +1,110 @@
 
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 <head>
-<title>Sweetcoin Debug 地图</title>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<style>
-    html, body, #map { height: 100%; margin: 0; padding: 0; }
-  </style>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
+    <meta charset="UTF-8">
+    <title>Sweetcoin Merchant Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; }
+        #buttonContainer { text-align: center; margin: 20px; }
+        .map-container { display: none; height: 80vh; width: 100vw; }
+        .active { display: block; }
+        #merchantMapContainer, #exploreMapContainer { margin: auto; }
+    </style>
 </head>
 <body>
-<div id="map"></div>
-<script type="module">
-    import config from './firebase-init.js';
+    <div id="buttonContainer">
+        <button onclick="showMap('merchant')">Merchant Submission Map</button>
+        <button onclick="showMap('explore')">Explore Approved Merchants</button>
+    </div>
 
-    const app = firebase.initializeApp(config);
-    console.log("✅ Firebase initialized");
+    <div id="merchantMapContainer" class="map-container">
+        <h2 style="text-align:center;">Submit Your Shop</h2>
+        <div id="merchantMap" style="height: 500px;"></div>
+        <div style="text-align:center;">
+            <input type="text" id="shopName" placeholder="Shop Name" />
+            <input type="text" id="walletAddress" placeholder="Wallet Address" />
+            <button onclick="submitMerchant()">Submit to Map</button>
+        </div>
+    </div>
 
-    const db = firebase.firestore();
-    console.log("📦 Firestore initialized");
+    <div id="exploreMapContainer" class="map-container">
+        <h2 style="text-align:center;">Explore Approved Merchants</h2>
+        <div id="exploreMap" style="height: 500px;"></div>
+    </div>
 
-    const map = L.map('map').setView([43.65, -79.38], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    <script>
+        const firebaseConfig = {
+            // NOTE: Add actual Firebase config here
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-    db.collection("merchants").where("status", "==", "approved").get()
-      .then((querySnapshot) => {
-        console.log("✅ Approved merchants fetched:", querySnapshot.size);
-        if (querySnapshot.empty) {
-          alert("没有通过审核的商家！");
+        let merchantMap;
+        let exploreMap;
+
+        function initMerchantMap() {
+            merchantMap = L.map('merchantMap').setView([0, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(merchantMap);
+            let marker;
+            merchantMap.on('click', function(e) {
+                if (marker) merchantMap.removeLayer(marker);
+                marker = L.marker(e.latlng).addTo(merchantMap);
+                marker.latlng = e.latlng;
+            });
         }
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const lat = data.lat;
-          const lng = data.lng;
-          const name = data.name || "商家";
-          if (lat && lng) {
-            L.marker([lat, lng]).addTo(map).bindPopup(name);
-          }
-        });
-      })
-      .catch((error) => {
-        console.error("❌ Error fetching merchants:", error);
-        alert("读取商家失败：" + error.message);
-      });
-  </script>
+
+        function initExploreMap() {
+            exploreMap = L.map('exploreMap').setView([0, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(exploreMap);
+
+            firebase.database().ref('merchants').orderByChild('status').equalTo('approved').once('value', (snapshot) => {
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    if (data.lat && data.lng) {
+                        L.marker([data.lat, data.lng])
+                            .addTo(exploreMap)
+                            .bindPopup(`<b>${data.shopName}</b><br>${data.walletAddress}`);
+                    }
+                });
+            });
+        }
+
+        function submitMerchant() {
+            const name = document.getElementById('shopName').value;
+            const wallet = document.getElementById('walletAddress').value;
+            if (!merchantMap || !merchantMap._layers) return alert("Please select a location.");
+            const latlng = Object.values(merchantMap._layers).find(l => l instanceof L.Marker).getLatLng();
+
+            firebase.database().ref('merchants').push({
+                shopName: name,
+                walletAddress: wallet,
+                lat: latlng.lat,
+                lng: latlng.lng,
+                status: "pending"
+            }).then(() => alert("Submitted for review!"));
+        }
+
+        function showMap(type) {
+            document.getElementById('merchantMapContainer').classList.remove('active');
+            document.getElementById('exploreMapContainer').classList.remove('active');
+            if (type === 'merchant') {
+                document.getElementById('merchantMapContainer').classList.add('active');
+                if (!merchantMap) initMerchantMap();
+            } else {
+                document.getElementById('exploreMapContainer').classList.add('active');
+                if (!exploreMap) initExploreMap();
+            }
+        }
+
+        // Default to merchant map
+        showMap('merchant');
+    </script>
 </body>
 </html>
