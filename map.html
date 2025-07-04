@@ -1,84 +1,54 @@
 
 <!DOCTYPE html>
-
 <html>
 <head>
-<meta charset="utf-8"/>
-<title>Sweetcoin Merchant Map</title>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
-<style>
-    html, body, #map { height: 100%; margin: 0; }
-    .popup-form input, .popup-form textarea, .popup-form button {
-      display: block; width: 100%; margin-top: 5px; padding: 5px;
-    }
-    .popup-form button {
-      background-color: #28a745; color: white; border: none; cursor: pointer;
-    }
+  <title>Sweetcoin Debug 地图</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    html, body, #map { height: 100%; margin: 0; padding: 0; }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
-<div id="map"></div>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script type="module">
-    import { db, addDoc, collection } from './firebase-init.js';
-    const map = L.map('map').setView([43.6532, -79.3832], 13); // Default to Toronto
+  <div id="map"></div>
+  <script type="module">
+    import config from './firebase-init.js';
 
+    const app = firebase.initializeApp(config);
+    console.log("✅ Firebase initialized");
+
+    const db = firebase.firestore();
+    console.log("📦 Firestore initialized");
+
+    const map = L.map('map').setView([43.65, -79.38], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    map.on('click', function(e) {
-      const popup = L.popup()
-        .setLatLng(e.latlng)
-        .setContent(`
-          <form class="popup-form">
-            <strong>Apply to Join Sweetcoin Map</strong><br/>
-            <input type="text" placeholder="Store Name" id="storeName" required />
-            <input type="text" placeholder="Wallet Address" id="wallet" required />
-            <textarea placeholder="Remarks" id="remarks"></textarea>
-            <button type="button" onclick="submitApplication(${e.latlng.lat}, ${e.latlng.lng})">Submit</button>
-          </form>
-        `)
-        .openOn(map);
-    });
-
-    window.submitApplication = async function(lat, lng) {
-      const name = document.getElementById("storeName").value;
-      const wallet = document.getElementById("wallet").value;
-      const remarks = document.getElementById("remarks").value;
-      if (!name || !wallet) {
-        alert("Store name and wallet address are required.");
-        return;
-      }
-      try {
-        await addDoc(collection(db, "merchants"), {
-          name, wallet, remarks,
-          lat, lng,
-          status: "pending",
-          createdAt: new Date().toISOString()
+    db.collection("merchants").where("status", "==", "approved").get()
+      .then((querySnapshot) => {
+        console.log("✅ Approved merchants fetched:", querySnapshot.size);
+        if (querySnapshot.empty) {
+          alert("没有通过审核的商家！");
+        }
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const lat = data.lat;
+          const lng = data.lng;
+          const name = data.name || "商家";
+          if (lat && lng) {
+            L.marker([lat, lng]).addTo(map).bindPopup(name);
+          }
         });
-        alert("✅ Submitted! Awaiting approval.");
-        map.closePopup();
-      } catch (err) {
-        alert("Submission failed: " + err);
-      }
-    }
+      })
+      .catch((error) => {
+        console.error("❌ Error fetching merchants:", error);
+        alert("读取商家失败：" + error.message);
+      });
   </script>
-<div id="approved-merchants" style="margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 6px;"></div><script>
-// 初始化 Firebase（确保 firebase-app.js 与 firebase-firestore.js 已引入）
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// 加载并显示 status == 'approved' 的商家
-db.collection("merchants").where("status", "==", "approved").get().then((querySnapshot) => {
-  const container = document.getElementById("approved-merchants");
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-    const div = document.createElement("div");
-    div.innerHTML = `<strong>${data.name}</strong><br/>${data.address || ""}<br/>${data.note || ""}<hr/>`;
-    container.appendChild(div);
-  });
-});
-</script></body>
+</body>
 </html>
