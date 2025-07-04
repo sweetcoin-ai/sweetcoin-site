@@ -1,54 +1,73 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Sweetcoin Debug 地图</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    html, body, #map { height: 100%; margin: 0; padding: 0; }
-  </style>
+  <meta charset="UTF-8" />
+  <title>Sweetcoin Merchant Map</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; }
+    #map { width: 100%; height: 100%; }
+    .leaflet-popup-content input { display: block; margin-bottom: 5px; width: 100%; }
+  </style>
 </head>
 <body>
   <div id="map"></div>
   <script type="module">
-    import config from './firebase-init.js';
+    import { db } from './firebase-init.js';
 
-    const app = firebase.initializeApp(config);
-    console.log("✅ Firebase initialized");
-
-    const db = firebase.firestore();
-    console.log("📦 Firestore initialized");
-
-    const map = L.map('map').setView([43.65, -79.38], 13);
+    const map = L.map('map').setView([0, 0], 2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    db.collection("merchants").where("status", "==", "approved").get()
-      .then((querySnapshot) => {
-        console.log("✅ Approved merchants fetched:", querySnapshot.size);
-        if (querySnapshot.empty) {
-          alert("没有通过审核的商家！");
+    // 显示已审核商家
+    async function loadApprovedMerchants() {
+      const querySnapshot = await db.collection("merchants").where("status", "==", "approved").get();
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.lat && data.lng) {
+          const marker = L.marker([data.lat, data.lng]).addTo(map);
+          marker.bindPopup(
+            `<b>${data.name}</b><br>Wallet: ${data.wallet}`
+          );
         }
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const lat = data.lat;
-          const lng = data.lng;
-          const name = data.name || "商家";
-          if (lat && lng) {
-            L.marker([lat, lng]).addTo(map).bindPopup(name);
-          }
-        });
-      })
-      .catch((error) => {
-        console.error("❌ Error fetching merchants:", error);
-        alert("读取商家失败：" + error.message);
       });
+    }
+
+    loadApprovedMerchants();
+
+    // 提交新商家
+    map.on('click', function (e) {
+      const popup = L.popup()
+        .setLatLng(e.latlng)
+        .setContent(`
+          <b>Submit Your Business</b><br>
+          <input type="text" id="name" placeholder="Business Name" />
+          <input type="text" id="wallet" placeholder="Wallet Address" />
+          <button onclick="submitMerchant(${e.latlng.lat}, ${e.latlng.lng})">Submit</button>
+        `)
+        .openOn(map);
+    });
+
+    window.submitMerchant = async function(lat, lng) {
+      const name = document.getElementById('name').value;
+      const wallet = document.getElementById('wallet').value;
+      if (!name || !wallet) {
+        alert("Please enter all fields.");
+        return;
+      }
+      try {
+        await db.collection("merchants").add({
+          name, wallet, lat, lng, status: "pending"
+        });
+        alert("Submitted! Waiting for approval.");
+      } catch (err) {
+        alert("Error submitting: " + err.message);
+      }
+    };
   </script>
 </body>
 </html>
