@@ -1,48 +1,39 @@
-<!DOCTYPE html>
 
+<!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8"/>
-<title>Approved Merchants</title>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
-<style>
-    #map { height: 100vh; }
+  <meta charset="UTF-8" />
+  <title>Sweetcoin Merchant Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; width: 100%; }
   </style>
 </head>
 <body>
-<div id="map"></div>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+  <div id="map"></div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCl6u3GEqgXX5fZaHExFlQmLr8JYtqvKfY",
-      authDomain: "sweetcoin-map.firebaseapp.com",
-      projectId: "sweetcoin-map",
-      storageBucket: "sweetcoin-map.appspot.com",
-      messagingSenderId: "213387673195",
-      appId: "1:213387673195:web:e93bfa7bde207ca5b4d1f0"
-    };
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script type="module">
+    import { db } from './firebase-init.js';
+    import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const map = L.map('map').setView([43.6532, -79.3832], 12); // 默认多伦多
 
-    const map = L.map('map').setView([43.6532, -79.3832], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+      maxZoom: 19,
     }).addTo(map);
 
     async function loadApprovedMerchants() {
-      const approvedQuery = query(collection(db, "merchants"), where("status", "==", "approved"));
-      const snapshot = await getDocs(approvedQuery);
-      snapshot.forEach((doc) => {
+      const approvedQuery = query(
+        collection(db, "merchants"),
+        where("status", "==", "approved")
+      );
+      const querySnapshot = await getDocs(approvedQuery);
+
+      querySnapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.lat && data.lng) {
-          const marker = L.marker([data.lat, data.lng]).addTo(map);
-          marker.bindPopup(`<strong>${data.name}</strong><br>Wallet: ${data.wallet}`);
-        }
+        const marker = L.marker([data.lat, data.lng]).addTo(map);
+        marker.bindPopup(`<strong>${data.name}</strong><br>Wallet: ${data.wallet}`);
       });
     }
 
