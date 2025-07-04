@@ -1,105 +1,56 @@
-
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8"/>
-<title>Sweetcoin Merchant Map</title>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
-<style>
-    html, body, #map { height: 100%; margin: 0; }
-    .popup-form input, .popup-form textarea, .popup-form button {
-      display: block; width: 100%; margin-top: 5px; padding: 5px;
+  <meta charset="UTF-8" />
+  <title>Sweetcoin Merchant Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-sA+4jDbsxG+3jStkOYf+zWLuZ4pucXz8mLTLyyLZpzw="
+    crossorigin=""
+  />
+  <style>
+    #map {
+      height: 500px;
+      width: 100%;
     }
-    .popup-form button {
-      background-color: #28a745; color: white; border: none; cursor: pointer;
+    #approved-merchants {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-<div id="map"></div>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script type="module">
-    import { db, addDoc, collection } from './firebase-init.js';
-    const map = L.map('map').setView([43.6532, -79.3832], 13); // Default to Toronto
+  <h1>Approved Merchants</h1>
+  <div id="map"></div>
+  <div id="approved-merchants"></div>
 
+  <script type="module">
+    import { db } from './firebase-init.js';
+
+    const map = L.map('map').setView([0, 0], 2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    map.on('click', function(e) {
-      const popup = L.popup()
-        .setLatLng(e.latlng)
-        .setContent(`
-          <form class="popup-form">
-            <strong>Apply to Join Sweetcoin Map</strong><br/>
-            <input type="text" placeholder="Store Name" id="storeName" required />
-            <input type="text" placeholder="Wallet Address" id="wallet" required />
-            <textarea placeholder="Remarks" id="remarks"></textarea>
-            <button type="button" onclick="submitApplication(${e.latlng.lat}, ${e.latlng.lng})">Submit</button>
-          </form>
-        `)
-        .openOn(map);
+    const approvedQuery = db.collection("merchants").where("status", "==", "approved");
+    approvedQuery.get().then((querySnapshot) => {
+      const container = document.getElementById("approved-merchants");
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const marker = L.marker([data.lat, data.lng]).addTo(map);
+        marker.bindPopup(`<strong>${data.name}</strong><br/>Wallet: ${data.wallet}`);
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${data.name}</strong><br/>${data.wallet || ""}<hr>`;
+        container.appendChild(div);
+      });
     });
-
-    window.submitApplication = async function(lat, lng) {
-      const name = document.getElementById("storeName").value;
-      const wallet = document.getElementById("wallet").value;
-      const remarks = document.getElementById("remarks").value;
-      if (!name || !wallet) {
-        alert("Store name and wallet address are required.");
-        return;
-      }
-      try {
-        await addDoc(collection(db, "merchants"), {
-          name, wallet, remarks,
-          lat, lng,
-          status: "pending",
-          createdAt: new Date().toISOString()
-        });
-        alert("✅ Submitted! Awaiting approval.");
-        map.closePopup();
-      } catch (err) {
-        alert("Submission failed: " + err);
-      }
-    }
   </script>
-<div id="approved-merchants" style="margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 6px;"></div><script>
-// 初始化 Firebase（确保 firebase-app.js 与 firebase-firestore.js 已引入）
-    firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const approvedQuery = db.collection("merchants").where("status", "==", "approved");
 
-approvedQuery.get().then((querySnapshot) => {
-  const container = document.getElementById("approved-merchants");
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-
-    // 添加地图标记
-    const marker = L.marker([data.lat, data.lng]).addTo(map);
-    marker.bindPopup(`<strong>${data.name}</strong><br/>Wallet: ${data.wallet}`);
-
-    // 列表展示
-    const div = document.createElement("div");
-    div.innerHTML = `<strong>${data.name}</strong><br/>${data.wallet || ""}<hr/>${data.remarks || ""}`;
-    container.appendChild(div);
-  });
-});
-
-const container = document.getElementById("approved-merchants");
-
-querySnapshot.forEach((doc) => {
-  const data = doc.data();
-
-  // 添加地图标记
-  const marker = L.marker([data.lat, data.lng]).addTo(map);
-  marker.bindPopup(`<strong>${data.name}</strong><br/>Wallet: ${data.wallet}`);
-
-  // 列表展示
-  const div = document.createElement("div");
-  div.innerHTML = `<strong>${data.name}</strong><br/>${data.wallet || ""}<hr>`;
-  container.appendChild(div);
-
-</script></body>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-o9N1j7kBQo3f6tEcCkDQjXtK3CozSkVbLr3/1C6tRUA="
+    crossorigin=""
+  ></script>
+</body>
 </html>
