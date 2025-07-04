@@ -1,15 +1,6 @@
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-import {
-  getFirestore, addDoc, collection
-} from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyD8xeABxQKvI7q32M1w3XV3Gjtnv94bQvA",
+export default {
+  apiKey: "AIzaSyD8XxeABXvQkVI7Q32Mw13XV3Gjtnv94bQVA",
   authDomain: "sweetcoin-b4af9.firebaseapp.com",
   projectId: "sweetcoin-b4af9"
 };
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-export { db, addDoc, collection };
