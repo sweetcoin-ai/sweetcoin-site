@@ -1,21 +1,22 @@
 
 <!DOCTYPE html>
+
 <html>
 <head>
-  <title>Sweetcoin Debug 地图</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
+<title>Sweetcoin Debug 地图</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<style>
     html, body, #map { height: 100%; margin: 0; padding: 0; }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
 </head>
 <body>
-  <div id="map"></div>
-  <script type="module">
+<div id="map"></div>
+<script type="module">
     import config from './firebase-init.js';
 
     const app = firebase.initializeApp(config);
