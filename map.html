@@ -67,10 +67,25 @@
   </script>
 <div id="approved-merchants" style="margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 6px;"></div><script>
 // 初始化 Firebase（确保 firebase-app.js 与 firebase-firestore.js 已引入）
-import { getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const approvedQuery = db.collection("merchants").where("status", "==", "approved");
 
-const approvedQuery = query(collection(db, "merchants"), where("status", "==", "approved"));
-const querySnapshot = await getDocs(approvedQuery);
+approvedQuery.get().then((querySnapshot) => {
+  const container = document.getElementById("approved-merchants");
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+
+    // 添加地图标记
+    const marker = L.marker([data.lat, data.lng]).addTo(map);
+    marker.bindPopup(`<strong>${data.name}</strong><br/>Wallet: ${data.wallet}`);
+
+    // 列表展示
+    const div = document.createElement("div");
+    div.innerHTML = `<strong>${data.name}</strong><br/>${data.wallet || ""}<hr/>${data.remarks || ""}`;
+    container.appendChild(div);
+  });
+});
 
 const container = document.getElementById("approved-merchants");
 
