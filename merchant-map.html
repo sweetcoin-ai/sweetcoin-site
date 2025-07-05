@@ -1,46 +1,84 @@
+
 <!DOCTYPE html>
-<html lang="en">
+
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Merchant Map</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-  <script src="firebase-init.js"></script>
+<meta charset="utf-8"/>
+<title>Sweetcoin Merchant Map</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
+<style>
+    html, body, #map { height: 100%; margin: 0; }
+    .popup-form input, .popup-form textarea, .popup-form button {
+      display: block; width: 100%; margin-top: 5px; padding: 5px;
+    }
+    .popup-form button {
+      background-color: #28a745; color: white; border: none; cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h2>Add Merchant</h2>
-  <div id="map" style="height: 500px;"></div>
-  <script>
-    const map = L.map('map').setView([43.65107, -79.347015], 13);
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script type="module">
+    import { db, addDoc, collection } from './firebase-init.js';
+    const map = L.map('map').setView([43.6532, -79.3832], 13); // Default to Toronto
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
+      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    map.on('click', async function(e) {
-      const name = prompt("Enter merchant name:");
-      const wallet = prompt("Enter wallet address:");
-      if (!name || !wallet) return;
-
-      const data = {
-        name: name,
-        lat: e.latlng.lat,
-        lng: e.latlng.lng,
-        wallet: wallet,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-        remarks: ""
-      };
-
-      try {
-        const db = firebase.firestore();
-        await db.collection("merchants").add(data);
-        alert("Merchant submitted for review.");
-      } catch (err) {
-        console.error("Error writing to Firebase:", err);
-      }
+    map.on('click', function(e) {
+      const popup = L.popup()
+        .setLatLng(e.latlng)
+        .setContent(`
+          <form class="popup-form">
+            <strong>Apply to Join Sweetcoin Map</strong><br/>
+            <input type="text" placeholder="Store Name" id="storeName" required />
+            <input type="text" placeholder="Wallet Address" id="wallet" required />
+            <textarea placeholder="Remarks" id="remarks"></textarea>
+            <button type="button" onclick="submitApplication(${e.latlng.lat}, ${e.latlng.lng})">Submit</button>
+          </form>
+        `)
+        .openOn(map);
     });
+
+    window.submitApplication = async function(lat, lng) {
+      const name = document.getElementById("storeName").value;
+      const wallet = document.getElementById("wallet").value;
+      const remarks = document.getElementById("remarks").value;
+      if (!name || !wallet) {
+        alert("Store name and wallet address are required.");
+        return;
+      }
+      try {
+        await addDoc(collection(db, "merchants"), {
+          name, wallet, remarks,
+          lat, lng,
+          status: "pending",
+          createdAt: new Date().toISOString()
+        });
+        alert("✅ Submitted! Awaiting approval.");
+        map.closePopup();
+      } catch (err) {
+        alert("Submission failed: " + err);
+      }
+    }
   </script>
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-</body>
+<div id="approved-merchants" style="margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 6px;"></div><script>
+// 初始化 Firebase（确保 firebase-app.js 与 firebase-firestore.js 已引入）
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// 加载并显示 status == 'approved' 的商家
+db.collection("merchants").where("status", "==", "approved").get().then((querySnapshot) => {
+  const container = document.getElementById("approved-merchants");
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    const div = document.createElement("div");
+    div.innerHTML = `<strong>${data.name}</strong><br/>${data.address || ""}<br/>${data.note || ""}<hr/>`;
+    container.appendChild(div);
+  });
+});
+</script></body>
 </html>
