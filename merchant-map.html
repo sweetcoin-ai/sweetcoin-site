@@ -1,111 +1,38 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Sweetcoin Merchant Portal</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Merchant QR Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
   <style>
-    html, body, #map { height: 100%; margin: 0; padding: 0; }
-    .popup-form input, .popup-form textarea, .popup-form button {
-      display: block;
-      width: 100%;
-      margin-top: 5px;
-      padding: 5px;
-    }
-    .popup-form button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    #qrcode {
-      margin-top: 10px;
-      text-align: center;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+    input { margin: 10px; padding: 8px; width: 80%; max-width: 300px; }
+    button { padding: 10px 20px; font-size: 16px; }
+    #qrcode { margin: 20px auto; }
   </style>
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
-  <div id="map"></div>
+  <h2>Merchant QR Code Generator</h2>
+  <input id="storeName" placeholder="Enter Store Name" /><br />
+  <input id="walletAddress" placeholder="Enter Wallet Address" /><br />
+  <button onclick="generateQR()">Generate QR Code</button>
   <div id="qrcode"></div>
-  <script type="module">
-    import { db, addDoc, collection } from './firebase-init.js';
+  <br />
+  <a href="map.html"><button>Submit to Map</button></a>
 
-    let map;
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        initMap(lat, lng);
-      }, function() {
-        initMap(43.65, -79.38); // fallback 多伦多
-      });
-    } else {
-      initMap(43.65, -79.38); // fallback
-    }
-
-    function initMap(lat, lng) {
-      map = L.map('map').setView([lat, lng], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-
-      map.on('click', function(e) {
-        const popup = L.popup()
-          .setLatLng(e.latlng)
-          .setContent(`
-            <form class="popup-form">
-              <strong>Apply to Join Sweetcoin Map</strong><br/>
-              <input type="text" placeholder="Store Name" id="storeName" required />
-              <input type="text" placeholder="Wallet Address" id="wallet" required />
-              <textarea placeholder="Remarks" id="remarks"></textarea>
-              <button type="button" onclick="submitApplication(${e.latlng.lat}, ${e.latlng.lng})">Submit</button>
-              <button type="button" onclick="generateQRCode()">Generate QR Code</button>
-            </form>
-          `)
-          .openOn(map);
+  <script>
+    function generateQR() {
+      const storeName = document.getElementById('storeName').value.trim();
+      const wallet = document.getElementById('walletAddress').value.trim();
+      const amount = "1";
+      const qrData = JSON.stringify({ store: storeName, address: wallet, amount: amount });
+      document.getElementById('qrcode').innerHTML = "";
+      QRCode.toCanvas(document.getElementById('qrcode'), qrData, function (error) {
+        if (error) console.error(error);
       });
     }
-
-    window.generateQRCode = function () {
-      const wallet = document.getElementById("wallet").value;
-      if (!wallet) {
-        alert("Please enter wallet address first.");
-        return;
-      }
-      const fixedAmount = 1;
-      const qrText = `wallet:${wallet}?amount=${fixedAmount}`;
-      const qrContainer = document.getElementById("qrcode");
-      qrContainer.innerHTML = "";
-      QRCode.toCanvas(qrText, { width: 200 }, function (err, canvas) {
-        if (err) console.error(err);
-        else qrContainer.appendChild(canvas);
-      });
-    };
-
-    window.submitApplication = async function(lat, lng) {
-      const name = document.getElementById("storeName").value;
-      const wallet = document.getElementById("wallet").value;
-      const remarks = document.getElementById("remarks").value;
-      if (!name || !wallet) {
-        alert("Store name and wallet address are required.");
-        return;
-      }
-      try {
-        await addDoc(collection(db, "merchants"), {
-          name, wallet, remarks,
-          lat, lng,
-          status: "pending",
-          createdAt: new Date().toISOString()
-        });
-        alert("✅ Submitted! Awaiting approval.");
-        map.closePopup();
-      } catch (err) {
-        alert("Submission failed: " + err);
-      }
-    };
   </script>
 </body>
 </html>
