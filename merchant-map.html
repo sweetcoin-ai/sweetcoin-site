@@ -1,45 +1,46 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Sweetcoin Merchant Map</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="firebase-init.js"></script>
+  <meta charset="UTF-8" />
+  <title>Merchant Map</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script src="firebase-init.js"></script>
 </head>
 <body>
-    <div id="map" style="width: 100%; height: 100vh;"></div>
-    <script>
-        var map = L.map('map').setView([43.651070, -79.347015], 13); // Toronto
+  <h2>Add Merchant</h2>
+  <div id="map" style="height: 500px;"></div>
+  <script>
+    const map = L.map('map').setView([43.65107, -79.347015], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+    map.on('click', async function(e) {
+      const name = prompt("Enter merchant name:");
+      const wallet = prompt("Enter wallet address:");
+      if (!name || !wallet) return;
 
-        map.on('click', function(e) {
-            var name = prompt("Enter store name:");
-            if (!name) return;
-            var wallet = prompt("Enter wallet address:");
-            if (!wallet) return;
+      const data = {
+        name: name,
+        lat: e.latlng.lat,
+        lng: e.latlng.lng,
+        wallet: wallet,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        remarks: ""
+      };
 
-            var lat = e.latlng.lat;
-            var lng = e.latlng.lng;
-            var data = {
-                name: name,
-                wallet: wallet,
-                lat: lat,
-                lng: lng,
-                status: "pending",
-                createdAt: new Date().toISOString(),
-                remarks: ""
-            };
-
-            firebase.database().ref("merchants").push(data).then(function() {
-                alert("Submitted to Firebase.");
-            });
-        });
-    </script>
+      try {
+        const db = firebase.firestore();
+        await db.collection("merchants").add(data);
+        alert("Merchant submitted for review.");
+      } catch (err) {
+        console.error("Error writing to Firebase:", err);
+      }
+    });
+  </script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 </body>
 </html>
