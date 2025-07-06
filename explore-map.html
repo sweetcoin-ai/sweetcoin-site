@@ -1,48 +1,53 @@
-
 <!DOCTYPE html>
 <html>
 <head>
+  <title>Sweetcoin Debug 地图</title>
   <meta charset="utf-8" />
-  <title>Explore Sweetcoin Merchant Map</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    #map { height: 100vh; }
+    html, body, #map { height: 100%; margin: 0; padding: 0; }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
   <div id="map"></div>
+  <script type="module">
+    import config from './firebase-init.js';
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="firebase-init.js"></script>
-  <script>
-    console.log("开始加载 Firebase...");
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
+    const app = firebase.initializeApp(config);
+    console.log("✅ Firebase initialized");
 
-    const map = L.map('map').setView([43.65, -79.38], 12);
+    const db = firebase.firestore();
+    console.log("📦 Firestore initialized");
+
+    const map = L.map('map').setView([43.65, -79.38], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-    console.log("地图初始化成功");
 
-    db.collection("merchants").get().then((querySnapshot) => {
-      console.log("开始获取商家列表...");
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        console.log("商家数据：", data);
-        if (data.status === "approved") {
-          const marker = L.marker([data.lat, data.lng]).addTo(map);
-          marker.bindPopup(
-            `<b>${data.name}</b><br/>Wallet: ${data.wallet || 'N/A'}<br/>Remarks: ${data.remarks || ''}`
-          );
+    db.collection("merchants").where("status", "==", "approved").get()
+      .then((querySnapshot) => {
+        console.log("✅ Approved merchants fetched:", querySnapshot.size);
+        if (querySnapshot.empty) {
+          alert("没有通过审核的商家！");
         }
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const lat = data.lat;
+          const lng = data.lng;
+          const name = data.name || "商家";
+          if (lat && lng) {
+            L.marker([lat, lng]).addTo(map).bindPopup(name);
+          }
+        });
+      })
+      .catch((error) => {
+        console.error("❌ Error fetching merchants:", error);
+        alert("读取商家失败：" + error.message);
       });
-    }).catch((error) => {
-      console.error("Error getting documents: ", error);
-    });
   </script>
 </body>
 </html>
