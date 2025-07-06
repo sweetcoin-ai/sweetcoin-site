@@ -3,32 +3,36 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Explore Sweetcoin Merchants</title>
+  <title>Explore Sweetcoin Merchant Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-sA+e2atJbLdJGSfPDZiKzUgUQ1p1gEaPsy8ikVoHgvM=" crossorigin="" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-o9N1j7kGStbE5xC61TkaUftnpAU4l0wE8PaPb140P8M=" crossorigin=""></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-  <script src="firebase-init.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map { height: 100vh; width: 100vw; }
+    #map { height: 100vh; }
   </style>
 </head>
 <body>
   <div id="map"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="firebase-init.js"></script>
   <script>
-    const db = firebase.firestore();
-    const map = L.map('map').setView([43.6532, -79.3832], 12);
+    console.log("开始加载 Firebase...");
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(app);
+
+    const map = L.map('map').setView([43.65, -79.38], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap contributors'
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
+    console.log("地图初始化成功");
 
     db.collection("merchants").get().then((querySnapshot) => {
+      console.log("开始获取商家列表...");
       querySnapshot.forEach((doc) => {
         const data = doc.data();
+        console.log("商家数据：", data);
         if (data.status === "approved") {
           const marker = L.marker([data.lat, data.lng]).addTo(map);
           marker.bindPopup(
