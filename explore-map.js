@@ -31,7 +31,8 @@ async function loadApprovedMerchants() {
   const querySnapshot = await getDocs(q);
   querySnapshot.forEach(doc => {
     const m = doc.data();
-    L.marker([m.lat, m.lng])
+   L.marker([parseFloat(m.lat), parseFloat(m.lng)])
+
       .addTo(map)
       .bindPopup(`<b>${m.name}</b><br>Wallet: ${m.wallet}`);
   });
