@@ -15,9 +15,12 @@
 <body>
   <div id="map"></div>
   <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+  import config from "./firebase-init.js";
     import config from './firebase-init.js';
 
-    const app = firebase.initializeApp(config);
+    const app = initializeApp(config);
     console.log("✅ Firebase initialized");
 
     const db = firebase.firestore();
