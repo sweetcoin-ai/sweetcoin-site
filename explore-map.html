@@ -6,39 +6,8 @@
   <title>Explore Sweetcoin Merchant Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import {
-      getFirestore, collection, query, where, getDocs
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+  <script type="module" src="explore-map.js"></script>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDln4jwnhwI-Zg7NNRfRuHVzWqR70vK1fA",
-      authDomain: "sweetcoin-map.firebaseapp.com",
-      projectId: "sweetcoin-map",
-      storageBucket: "sweetcoin-map.appspot.com",
-      messagingSenderId: "324069311765",
-      appId: "1:324069311765:web:fae78c5fd6a87be2a3fc25"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      const map = L.map('map').setView([43.65107, -79.347015], 12);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-
-      const q = query(collection(db, "merchants"), where("status", "==", "approved"));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const marker = L.marker([data.lat, data.lng]).addTo(map);
-        marker.bindPopup(`<b>${data.name}</b><br>Wallet: ${data.wallet}`);
-      });
-    });
-  </script>
   <style>
     body, html {
       margin: 0;
