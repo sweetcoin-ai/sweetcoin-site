@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Firebase Read Test</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h2>Approved Merchants (Test)</h2>
+  <ul id="merchantList"></ul>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBPH0xj3lh0ZzpqFe-Gp2X0F5EyUSOlKMA",
+      authDomain: "sweetcoin-map.firebaseapp.com",
+      projectId: "sweetcoin-map",
+      storageBucket: "sweetcoin-map.appspot.com",
+      messagingSenderId: "538334181327",
+      appId: "1:538334181327:web:2b7b11691f51d7be5b3d10"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    db.collection("merchants")
+      .where("status", "==", "approved")
+      .get()
+      .then(querySnapshot => {
+        const list = document.getElementById("merchantList");
+        if (querySnapshot.empty) {
+          list.innerHTML = "<li>No approved merchants found.</li>";
+        } else {
+          querySnapshot.forEach(doc => {
+            const data = doc.data();
+            const li = document.createElement("li");
+            li.textContent = `${data.name} (${data.lat}, ${data.lng})`;
+            list.appendChild(li);
+          });
+        }
+      })
+      .catch(error => {
+        console.error("Error reading from Firestore:", error);
+        alert("Firestore read failed. Check console for details.");
+      });
+  </script>
+</body>
+</html>
