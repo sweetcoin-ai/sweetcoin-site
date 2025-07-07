@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sweetcoin Explore Map (Debug)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; width: 100vw; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAgaAA_a8NZMp5zovt3uWvXONZQgAZrR-U",
+      authDomain: "sweetcoin-map.firebaseapp.com",
+      projectId: "sweetcoin-map",
+      storageBucket: "sweetcoin-map.appspot.com",
+      messagingSenderId: "313464908320",
+      appId: "1:313464908320:web:002530a719cfcedfdf6eb0"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const map = L.map('map').setView([43.6532, -79.3832], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+    }).addTo(map);
+
+    db.collection("merchants").get().then((querySnapshot) => {
+      console.log("Total documents found:", querySnapshot.size);
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        console.log("Document:", data);
+
+        if (data.status === "approved") {
+          L.marker([data.lat, data.lng])
+            .addTo(map)
+            .bindPopup(data.name || "Unnamed Merchant");
+        }
+      });
+    }).catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+  </script>
+</body>
+</html>
