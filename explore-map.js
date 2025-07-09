@@ -1,28 +1,21 @@
+// explore-map.js
+import { collection, getDocs, getFirestore, query, where } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+import { db } from './firebase-init.js';
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
-import { firebaseConfig } from './firebase-init.js';
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const map = L.map('map').setView([43.6532, -79.3832], 12);
+const map = L.map('map').setView([43.65107, -79.347015], 12);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap contributors'
+  maxZoom: 19,
 }).addTo(map);
 
 async function loadApprovedMerchants() {
-  const querySnapshot = await getDocs(collection(db, "merchants"));
-  console.log("Total merchants fetched:", querySnapshot.size);
-
+  const q = query(collection(db, "merchants"), where("status", "==", "approved"));
+  const querySnapshot = await getDocs(q);
   querySnapshot.forEach((doc) => {
     const data = doc.data();
-    console.log("Merchant data:", data);
-
-    if (data.status === "approved" && data.lat && data.lng) {
+    if (data.lat && data.lng && data.name) {
       L.marker([data.lat, data.lng])
         .addTo(map)
-        .bindPopup(`<b>${data.name || 'Unnamed Merchant'}</b>`);
+        .bindPopup(`<b>${data.name}</b><br>${data.wallet || ''}`);
     }
   });
 }
