@@ -1,81 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>Sweetcoin Merchant Submission Map</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-  <style>
-    #map { height: 100vh; width: 100%; }
-    #form-popup {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 1000;
-      background: white;
-      padding: 10px;
-      border: 1px solid #ccc;
-      display: none;
+<meta charset="utf-8"/>
+<title>Sweetcoin Merchant Map</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
+<style>
+    html, body, #map { height: 100%; margin: 0; }
+    .popup-form input, .popup-form textarea, .popup-form button {
+      display: block; width: 100%; margin-top: 5px; padding: 5px;
     }
-  </style>
+    .popup-form button {
+      background-color: #28a745; color: white; border: none; cursor: pointer;
+    }
+</style>
 </head>
 <body>
-  <div id="map"></div>
-  <div id="form-popup">
-    <label>Store Name: <input type="text" id="storeName" /></label><br />
-    <label>Wallet Address: <input type="text" id="walletAddress" /></label><br />
-    <button onclick="submitApplication()">Submit</button>
-  </div>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script type="module">
+  import { db, addDoc, collection } from './firebase-init-merchant.js';
+  const map = L.map('map').setView([43.6532, -79.3832], 13); // Default to Toronto
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
 
-    import { firebaseConfig } from './firebase-init.js';
+  map.on('click', function(e) {
+    const popup = L.popup()
+      .setLatLng(e.latlng)
+      .setContent(`
+        <form class="popup-form">
+          <strong>Apply to Join Sweetcoin Map</strong><br/>
+          <input type="text" placeholder="Store Name" id="storeName" required />
+          <input type="text" placeholder="Wallet Address" id="wallet" required />
+          <textarea placeholder="Remarks" id="remarks"></textarea>
+          <button type="button" id="submitBtn">Submit</button>
+        </form>
+      `)
+      .openOn(map);
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    let map = L.map('map').setView([43.65107, -79.347015], 12); // Default to Toronto
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    let tempLatLng = null;
-
-    map.on('click', function (e) {
-      tempLatLng = e.latlng;
-      document.getElementById('form-popup').style.display = 'block';
-    });
-
-    window.submitApplication = async function () {
-      const name = document.getElementById('storeName').value.trim();
-      const wallet = document.getElementById('walletAddress').value.trim();
-      if (!name || !wallet || !tempLatLng) return alert("Please complete all fields.");
-
-      try {
-        await addDoc(collection(db, "merchants"), {
-          name: name,
-          wallet: wallet,
-          lat: tempLatLng.lat,
-          lng: tempLatLng.lng,
-          status: "pending",
-          createdAt: serverTimestamp(),
-          remarks: ""
-        });
-        alert("Application submitted.");
-        document.getElementById('form-popup').style.display = 'none';
-      } catch (err) {
-        alert("Submission failed: " + err.message);
+    // 必须在 popup 加载后绑定事件
+    setTimeout(() => {
+      const submitBtn = document.getElementById("submitBtn");
+      if (submitBtn) {
+        submitBtn.addEventListener("click", () => submitApplication(e.latlng.lat, e.latlng.lng));
       }
-    }
-  </script>
+    }, 100);
+  });
 
-  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  async function submitApplication(lat, lng) {
+    const name = document.getElementById("storeName").value;
+    const wallet = document.getElementById("wallet").value;
+    const remarks = document.getElementById("remarks").value;
+    if (!name || !wallet) {
+      alert("Store name and wallet address are required.");
+      return;
+    }
+    try {
+      await addDoc(collection(db, "merchants"), {
+        name, wallet, remarks,
+        lat, lng,
+        status: "pending",
+        createdAt: new Date().toISOString()
+      });
+      alert("✅ Submitted! Awaiting approval.");
+      map.closePopup();
+    } catch (err) {
+      alert("Submission failed: " + err);
+    }
+  }
+</script>
 </body>
 </html>
