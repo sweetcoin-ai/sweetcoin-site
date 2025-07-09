@@ -1,4 +1,3 @@
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import {
   getFirestore,
@@ -8,6 +7,7 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
+// ✅ 你的 Firebase 配置，保持不变
 const firebaseConfig = {
   apiKey: "AIzaSyDaK-v3kN4j_nuARwX3Uz2hJbtv81yUosM",
   authDomain: "sweetcoin-map.firebaseapp.com",
@@ -18,24 +18,31 @@ const firebaseConfig = {
   measurementId: "G-X7BQD4QEX7"
 };
 
+// ✅ 初始化 Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// ✅ 初始化 Leaflet 地图
 const map = L.map("map").setView([43.6532, -79.3832], 13);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19
 }).addTo(map);
 
+// ✅ 从 Firebase 加载所有 status = "approved" 的商家并在地图显示
 async function loadApprovedMerchants() {
-  const q = query(collection(db, "merchants"), where("status", "==", "approved"));
-  const querySnapshot = await getDocs(q);
-  querySnapshot.forEach(doc => {
-    const m = doc.data();
-   L.marker([parseFloat(m.lat), parseFloat(m.lng)])
-
-      .addTo(map)
-      .bindPopup(`<b>${m.name}</b><br>Wallet: ${m.wallet}`);
-  });
+  try {
+    const q = query(collection(db, "merchants"), where("status", "==", "approved"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.lat && data.lng) {
+        const marker = L.marker([data.lat, data.lng]).addTo(map);
+        marker.bindPopup(`<b>${data.name}</b><br>Wallet: ${data.wallet || "N/A"}`);
+      }
+    });
+  } catch (error) {
+    console.error("Error loading approved merchants:", error);
+  }
 }
 
 loadApprovedMerchants();
