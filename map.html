@@ -1,6 +1,4 @@
-
 <!DOCTYPE html>
-
 <html>
 <head>
 <meta charset="utf-8"/>
@@ -15,79 +13,63 @@
     .popup-form button {
       background-color: #28a745; color: white; border: none; cursor: pointer;
     }
-  </style>
+</style>
 </head>
 <body>
 <div id="map"></div>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script type="module">
-    import { db, addDoc, collection } from './firebase-init.js';
-    const map = L.map('map').setView([43.6532, -79.3832], 13); // Default to Toronto
+  import { db, addDoc, collection } from './firebase-init-merchant.js';
+  const map = L.map('map').setView([43.6532, -79.3832], 13); // Default to Toronto
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
 
-    map.on('click', function(e) {
-      const popup = L.popup()
-        .setLatLng(e.latlng)
-        .setContent(`
-          <form class="popup-form">
-            <strong>Apply to Join Sweetcoin Map</strong><br/>
-            <input type="text" placeholder="Store Name" id="storeName" required />
-            <input type="text" placeholder="Wallet Address" id="wallet" required />
-            <textarea placeholder="Remarks" id="remarks"></textarea>
-            <button type="button" onclick="submitApplication(${e.latlng.lat}, ${e.latlng.lng})">Submit</button>
-          </form>
-        `)
-        .openOn(map);
-    });
+  map.on('click', function(e) {
+    const popup = L.popup()
+      .setLatLng(e.latlng)
+      .setContent(`
+        <form class="popup-form">
+          <strong>Apply to Join Sweetcoin Map</strong><br/>
+          <input type="text" placeholder="Store Name" id="storeName" required />
+          <input type="text" placeholder="Wallet Address" id="wallet" required />
+          <textarea placeholder="Remarks" id="remarks"></textarea>
+          <button type="button" id="submitBtn">Submit</button>
+        </form>
+      `)
+      .openOn(map);
 
-    window.submitApplication = async function(lat, lng) {
-      const name = document.getElementById("storeName").value;
-      const wallet = document.getElementById("wallet").value;
-      const remarks = document.getElementById("remarks").value;
-      if (!name || !wallet) {
-        alert("Store name and wallet address are required.");
-        return;
+    // 必须在 popup 加载后绑定事件
+    setTimeout(() => {
+      const submitBtn = document.getElementById("submitBtn");
+      if (submitBtn) {
+        submitBtn.addEventListener("click", () => submitApplication(e.latlng.lat, e.latlng.lng));
       }
-      try {
-        await addDoc(collection(db, "merchants"), {
-          name, wallet, remarks,
-          lat, lng,
-          status: "pending",
-          createdAt: new Date().toISOString()
-        });
-        alert("✅ Submitted! Awaiting approval.");
-        map.closePopup();
-      } catch (err) {
-        alert("Submission failed: " + err);
-      }
+    }, 100);
+  });
+
+  async function submitApplication(lat, lng) {
+    const name = document.getElementById("storeName").value;
+    const wallet = document.getElementById("wallet").value;
+    const remarks = document.getElementById("remarks").value;
+    if (!name || !wallet) {
+      alert("Store name and wallet address are required.");
+      return;
     }
-  </script>
-<div id="approved-merchants" style="margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 6px;"></div><script>
-// 初始化 Firebase（确保 firebase-app.js 与 firebase-firestore.js 已引入）
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// 加载并显示 status == 'approved' 的商家
-db.collection("merchants").where("status", "==", "approved").get().then((querySnapshot) => {
-  const container = document.getElementById("approved-merchants");
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-
-    // 添加地图标记
-    const marker = L.marker([data.lat, data.lng]).addTo(map);
-    marker.bindPopup(`<strong>${data.name}</strong><br/>Wallet: ${data.wallet}`);
-
-    // 原来列表展示也保留
-    const div = document.createElement("div");
-    div.innerHTML = `<strong>${data.name}</strong><br/>${data.wallet || ""}<hr>`;
-    container.appendChild(div);
-  });
-});
-
-  });
-});
-</script></body>
+    try {
+      await addDoc(collection(db, "merchants"), {
+        name, wallet, remarks,
+        lat, lng,
+        status: "pending",
+        createdAt: new Date().toISOString()
+      });
+      alert("✅ Submitted! Awaiting approval.");
+      map.closePopup();
+    } catch (err) {
+      alert("Submission failed: " + err);
+    }
+  }
+</script>
+</body>
 </html>
