@@ -7,27 +7,51 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
-// 点击地图添加商家
-map.on('click', async function (e) {
-  const name = prompt("Enter your business name:");
-  const wallet = prompt("Enter your wallet address:");
-  if (!name || !wallet) return;
-
+// 监听地图点击
+map.on('click', function (e) {
   const lat = e.latlng.lat;
   const lng = e.latlng.lng;
 
-  try {
-    await addDoc(collection(db, "merchants"), {
-      name,
-      wallet,
-      lat,
-      lng,
-      status: "pending",
-      createdAt: serverTimestamp(),
-      remarks: ""
-    });
-    alert("Submitted for review!");
-  } catch (error) {
-    console.error("Error adding document:", error);
-  }
+  const formHtml = `
+    <b>Apply to Join Sweetcoin Map</b><br>
+    <input id="nameInput" type="text" placeholder="Business name" style="width: 100%; margin-top: 5px;"><br>
+    <input id="walletInput" type="text" placeholder="Wallet address" style="width: 100%; margin-top: 5px;"><br>
+    <textarea id="remarksInput" placeholder="Remarks" style="width: 100%; margin-top: 5px;"></textarea><br>
+    <button id="submitBtn" style="width: 100%; margin-top: 5px; background: green; color: white;">Submit</button>
+  `;
+
+  const popup = L.popup()
+    .setLatLng(e.latlng)
+    .setContent(formHtml)
+    .openOn(map);
+
+  setTimeout(() => {
+    document.getElementById('submitBtn').onclick = async function () {
+      const name = document.getElementById('nameInput').value.trim();
+      const wallet = document.getElementById('walletInput').value.trim();
+      const remarks = document.getElementById('remarksInput').value.trim();
+
+      if (!name || !wallet) {
+        alert("Business name and wallet are required.");
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "merchants"), {
+          name,
+          wallet,
+          remarks,
+          lat,
+          lng,
+          status: "pending",
+          createdAt: serverTimestamp()
+        });
+        alert("Submitted for review!");
+        map.closePopup();
+      } catch (error) {
+        console.error("Error adding document:", error);
+        alert("Failed to submit.");
+      }
+    };
+  }, 100); // 延迟确保 DOM 元素加载完
 });
