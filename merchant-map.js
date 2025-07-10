@@ -1,6 +1,6 @@
 console.log("🔥 Loaded merchant-map.js version: 20250710");
 import { db } from './firebase-init-merchant.js';
-import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
 
 let currentLat = null;
 let currentLng = null;
