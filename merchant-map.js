@@ -46,7 +46,10 @@ document.getElementById('submitBtn').onclick = async function () {
       createdAt: serverTimestamp()
     });
     alert("Submitted for review!");
-    document.getElementById('customModal').style.display = 'none';
+   setTimeout(() => {
+  const modal = document.getElementById('customModal');
+  if (modal) modal.style.display = 'none';
+}, 10);
   } catch (err) {
     console.error("Error:", err);
     alert("Failed to submit.");
