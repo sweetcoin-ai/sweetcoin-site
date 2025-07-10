@@ -12,7 +12,11 @@ import { db } from './firebase-init-merchant.js';
 const map = L.map('map').setView([43.65107, -79.347015], 12);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
-}).addTo(map);
+}).addTo(map)；
+
+console.log("📡 Firebase db:", db);
+const testRef = collection(db, "merchants");
+console.log("📌 collection ref:", testRef);
 
 map.on('click', async (e) => {
     const name = prompt("Enter your shop name:");
@@ -23,18 +27,22 @@ map.on('click', async (e) => {
     const lat = e.latlng.lat;
     const lng = e.latlng.lng;
 
-    try {
-        await addDoc(collection(db, "merchants"), {
-            name,
-            wallet,
-            lat,
-            lng,
-            status: "pending",
-            createdAt: serverTimestamp(),
-            remarks: ""
-        });
-        alert("Submitted for review!");
-    } catch (e) {
-        console.error("Error adding document: ", e);
+  try {
+  console.log("开始写入 Firebase...");
+  await addDoc(collection(db, "merchants"), {
+    name,
+    wallet,
+    lat,
+    lng,
+    status: 'pending',
+    createdAt: serverTimestamp(),
+    remarks: ""
+  });
+  console.log("✅ Firebase 写入成功！");
+  alert("Submitted for review!");
+} catch (error) {
+  console.error("❌ Firebase 写入失败:", error);
+}
+
     }
 });
