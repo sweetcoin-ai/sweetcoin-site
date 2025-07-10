@@ -27,6 +27,9 @@
   }).addTo(map);
 
   map.on('click', function(e) {
+      const lat=e.latlng.lat;
+      const lng=e.latlng.lng
+      
     const popup = L.popup()
       .setLatLng(e.latlng)
       .setContent(`
@@ -44,7 +47,7 @@
     setTimeout(() => {
       const submitBtn = document.getElementById("submitBtn");
       if (submitBtn) {
-        submitBtn.addEventListener("click", () => submitApplication(e.latlng.lat, e.latlng.lng));
+        submitBtn.addEventListener("click", () => submitApplication(lat, lng));
       }
     }, 100);
   });
