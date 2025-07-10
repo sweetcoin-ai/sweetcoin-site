@@ -32,10 +32,5 @@ const map = L.map('map').setView([43.65107, -79.347015], 12);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
+});//
 
-
-
-    } catch (e) {
-        console.error("Error adding document: ", e);
-    }
-});
