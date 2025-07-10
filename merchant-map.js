@@ -8,6 +8,24 @@ map.on('click', function (e) {
 console.log("Firestore db:", db);
 const ref = collection(db, "merchants");
 console.log("ref:", ref);
+try {
+  const lat = e.latlng.lat;
+  const lng = e.latlng.lng;
+
+  await addDoc(ref, {
+    name,
+    wallet,
+    lat,
+    lng,
+    status: "pending",
+    createdAt: serverTimestamp(),
+    remarks: ""
+  });
+
+  alert("Submitted for review!");
+} catch (error) {
+  console.error("Error adding document:", error);
+}
 
 
 const map = L.map('map').setView([43.65107, -79.347015], 12);
