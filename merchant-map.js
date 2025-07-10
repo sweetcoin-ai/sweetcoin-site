@@ -1,4 +1,4 @@
-import { db } from './firebase-init-merchant.js';
+import { db }from'./firebase-init-merchant.js';
 console.log("db from firebase-init:", db);
 
 import { collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
