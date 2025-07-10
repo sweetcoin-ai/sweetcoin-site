@@ -2,6 +2,10 @@ import { db } from './firebase-init-merchant.js';
 import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
 
 import L from 'https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js';
+console.log("Firestore db:", db);
+const ref = collection(db, "merchants");
+console.log("ref:", ref);
+
 
 const map = L.map('map').setView([43.65107, -79.347015], 12);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
