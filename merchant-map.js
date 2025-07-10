@@ -13,26 +13,28 @@ map.on('click', function (e) {
   const lng = e.latlng.lng;
 
   const formHtml = `
-    <b>Apply to Join Sweetcoin Map</b><br>
-    <input id="nameInput" type="text" placeholder="Business name" style="width: 100%; margin-top: 5px;"><br>
-    <input id="walletInput" type="text" placeholder="Wallet address" style="width: 100%; margin-top: 5px;"><br>
-    <textarea id="remarksInput" placeholder="Remarks" style="width: 100%; margin-top: 5px;"></textarea><br>
-    <button id="submitBtn" style="width: 100%; margin-top: 5px; background: green; color: white;">Submit</button>
+    <b>Submit Your Business</b><br>
+    <input id="nameInput" type="text" placeholder="Business Name" style="width:100%; margin: 5px 0;"><br>
+    <input id="walletInput" type="text" placeholder="Wallet Address" style="width:100%; margin: 5px 0;"><br>
+    <textarea id="remarksInput" placeholder="Remarks" style="width:100%; margin: 5px 0;"></textarea><br>
+    <button id="submitBtn" style="width:100%; background:green; color:white;">Submit</button>
   `;
 
   const popup = L.popup()
-    .setLatLng(e.latlng)
+    .setLatLng([lat, lng])
     .setContent(formHtml)
     .openOn(map);
 
   setTimeout(() => {
-    document.getElementById('submitBtn').onclick = async function () {
+    const btn = document.getElementById('submitBtn');
+    if (!btn) return;
+    btn.onclick = async () => {
       const name = document.getElementById('nameInput').value.trim();
       const wallet = document.getElementById('walletInput').value.trim();
       const remarks = document.getElementById('remarksInput').value.trim();
 
       if (!name || !wallet) {
-        alert("Business name and wallet are required.");
+        alert("Business name and wallet address are required.");
         return;
       }
 
@@ -48,10 +50,10 @@ map.on('click', function (e) {
         });
         alert("Submitted for review!");
         map.closePopup();
-      } catch (error) {
-        console.error("Error adding document:", error);
+      } catch (err) {
+        console.error("Error:", err);
         alert("Failed to submit.");
       }
     };
-  }, 100); // 延迟确保 DOM 元素加载完
+  }, 50);
 });
