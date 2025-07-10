@@ -11,6 +11,7 @@
       height: 100vh;
       width: 100%;
     }
+
     .popup-form input,
     .popup-form textarea,
     .popup-form button {
@@ -19,16 +20,82 @@
       margin-top: 5px;
       padding: 5px;
     }
+
     .popup-form button {
       background-color: #28a745;
       color: white;
       border: none;
       cursor: pointer;
     }
+
+    /* ===== 自定义浮动弹窗样式（照片风格） ===== */
+    #customModal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    #modalContent {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    #modalContent h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    #modalContent input,
+    #modalContent textarea,
+    #modalContent button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 8px;
+    }
+
+    #modalContent button {
+      background-color: green;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #closeBtn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
+
+  <!-- ✅ 自定义浮动弹窗结构（仿照片） -->
+  <div id="customModal">
+    <div id="modalContent">
+      <span id="closeBtn">×</span>
+      <h2>Apply to Join Sweetcoin Map</h2>
+      <input id="nameInput" type="text" placeholder="Business Name">
+      <input id="walletInput" type="text" placeholder="Wallet Address">
+      <textarea id="remarksInput" placeholder="Remarks"></textarea>
+      <button id="submitBtn">Submit</button>
+    </div>
+  </div>
+
   <script type="module" src="merchant-map.js"></script>
 </body>
 </html>
