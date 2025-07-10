@@ -1,6 +1,6 @@
 import { db } from './firebase-init-merchant.js';
 import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
-map.on('click', function (e) {
+map.on('click',async function (e) {
     console.log("点击地图了"); // ← 添加这一行调试用
     const name = prompt("Enter your business name:");
     const wallet = prompt("Enter your wallet address:");
