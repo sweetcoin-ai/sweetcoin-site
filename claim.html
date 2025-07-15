@@ -157,14 +157,30 @@
       if (button) button.disabled = true;
 
     } catch (err) {
-      const msg = err?.error?.message || err.message || "";
-      if (msg.includes("execution reverted") || msg.toLowerCase().includes("already claimed") || msg.includes("JSON-RPC")) {
-        status.textContent = "You have already claimed your tokens.";
-      } else {
-        status.textContent = "Error: " + msg;
-      }
-      if (button) button.disabled = false;
+  const msg = err?.error?.message || err.message || "";
+
+  if (
+    msg.includes("execution reverted") ||
+    msg.toLowerCase().includes("already claimed") ||
+    msg.includes("JSON-RPC")
+  ) {
+    status.textContent = "You have already claimed your tokens.";
+  } else {
+    status.textContent = "Error: " + msg;
+
+
+    const isTrust = window.ethereum?.isTrust || navigator.userAgent.toLowerCase().includes("trust");
+    if (isTrust) {
+      alert(
+        "❗领取未成功？\n\n请复制以下地址，并在您的钱包内置浏览器中重新打开本页面进行领取：\n\n" +
+        window.location.href
+      );
     }
+  }
+
+  if (button) button.disabled = false;
+}
+
 
     actionLocked = false;
   }
