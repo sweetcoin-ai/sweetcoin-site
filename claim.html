@@ -150,11 +150,24 @@
       const signer = provider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
-      status.textContent = "Claiming 20 SWTC...";
-      const tx = await contract.claim();
-      await tx.wait();
-      status.textContent = "✅ Success! 20 SWTC claimed. You may now close your wallet app.";
-      if (button) button.disabled = true;
+            status.textContent = "Claiming 20 SWTC...";
+
+        try {
+          const tx = await contract.claim({ gasLimit: 100000 });
+          await tx.wait();
+          status.textContent = "✅ Success! 20 SWTC claimed. You may now close your wallet app.";
+          if (button) button.disabled = true;
+        } catch (claimErr) {
+          console.error("Claim failed:", claimErr);
+          status.textContent = "❌ Claim failed. Please try again.";
+
+          alert(
+            "❗领取未成功？\n\n请复制以下地址，并在您的钱包内置浏览器中重新打开本页面进行领取：\n\n" +
+            window.location.href
+          );
+
+          if (button) button.disabled = false;
+        }
 
     } catch (err) {
       const msg = err?.error?.message || err.message || "";
