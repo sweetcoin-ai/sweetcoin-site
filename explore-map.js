@@ -19,7 +19,8 @@ if (querySnapshot.empty) {
   p.style.marginTop = '20px';
 
   const mapElement = document.getElementById('map');
-  mapElement.parentNode.insertBefore(p, mapElement.nextSibling);
+ mapElement.after(p);
+
 }
 
 
